@@ -13,6 +13,13 @@
             }
         },
         {
+            "scope": "keyword.control.lua",
+            "settings": {
+                "foreground": "#f77575",
+                "fontStyle": "bold"
+            }
+        },
+        {
             "scope": "keyword.operator",
             "settings": {
                 "foreground": "#f77575"
@@ -20,6 +27,12 @@
         },
         {
             "scope": "support.function.any-method.lua",
+            "settings": {
+                "foreground": "#fafa9f"
+            }
+        },
+        {
+            "scope": "entity.name.function.lua",
             "settings": {
                 "foreground": "#fafa9f"
             }
@@ -49,21 +62,33 @@
             }
         },
         {
-            "scope": "punctuation.section.brackets",
+            "scope": "string.quoted.double.lua",
             "settings": {
-                "foreground": "#515752"
+                "foreground": "#a7ff91"
             }
         },
         {
-            "scope": "punctuation.section.parens",
+            "scope": "comment.line.double-dash.lua",
             "settings": {
-                "foreground": "#515752"
+                "foreground": "#595958"
             }
         },
         {
-            "scope": "punctuation.section.braces",
+            "scope": "keyword.local.lua",
             "settings": {
-                "foreground": "5#515752"
+                "foreground": "#f77575"
+            }
+        },
+        {
+            "scope": "variable.language.self.lua",
+            "settings": {
+                "foreground": "#f77575"
+            }
+        },
+        {
+            "scope": "meta.function.lua",
+            "settings": {
+                "foreground": "#f77575"
             }
         }
     ]
