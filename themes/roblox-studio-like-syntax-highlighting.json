@@ -1,0 +1,70 @@
+{
+	"name": "Roblox Studio-Like Syntax Highlighting",
+	"colors": {
+        "editor.background": "#000000",
+        "editor.foreground": "#ffffff"
+	},
+	"tokenColors": [
+        {
+            "scope": "keyword.control.luau",
+            "settings": {
+                "foreground": "#f77575",
+                "fontStyle": "bold"
+            }
+        },
+        {
+            "scope": "keyword.operator",
+            "settings": {
+                "foreground": "#f77575"
+            }
+        },
+        {
+            "scope": "support.function.any-method.lua",
+            "settings": {
+                "foreground": "#fafa9f"
+            }
+        },
+        {
+            "scope": "entity.other.attribute.lua",
+            "settings": {
+                "foreground": "#4498ff"
+            }
+        },
+        {
+            "scope": "entity.name.class.lua",
+            "settings": {
+                "foreground": "#ffffff"
+            }
+        },
+        {
+            "scope": "entity.name.type",
+            "settings": {
+                "foreground": "#44e7f9"
+            }
+        },
+        {
+            "scope": "keyword.function.luau",
+            "settings": {
+                "foreground": "#44e7f9"
+            }
+        },
+        {
+            "scope": "punctuation.section.brackets",
+            "settings": {
+                "foreground": "#515752"
+            }
+        },
+        {
+            "scope": "punctuation.section.parens",
+            "settings": {
+                "foreground": "#515752"
+            }
+        },
+        {
+            "scope": "punctuation.section.braces",
+            "settings": {
+                "foreground": "5#515752"
+            }
+        }
+    ]
+}
