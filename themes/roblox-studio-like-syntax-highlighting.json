@@ -163,6 +163,13 @@
             "settings": {
                 "foreground": "#f5ce42"
             }
+        },
+        {
+            "scope": "constant.numeric.decimal.luau",
+            "settings": {
+                "foreground": "#f5ce42"
+            }
         }
+
     ]
 }
