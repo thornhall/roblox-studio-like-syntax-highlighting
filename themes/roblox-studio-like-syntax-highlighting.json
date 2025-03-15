@@ -175,7 +175,12 @@
             "settings": {
                 "foreground": "#44e7f9"
             }
+        },
+        {
+            "scope": "constant.language.nil.luau",
+            "settings": {
+                "foreground": "#f5ce42"
+            }
         }
-
     ]
 }
