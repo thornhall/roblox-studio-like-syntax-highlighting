@@ -169,6 +169,12 @@
             "settings": {
                 "foreground": "#f5ce42"
             }
+        },
+        {
+            "scope": "constant.language.luau",
+            "settings": {
+                "foreground": "#44e7f9"
+            }
         }
 
     ]
