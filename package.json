@@ -2,7 +2,7 @@
   "name": "roblox-studio-like-syntax-highlighting",
   "displayName": "Roblox Studio-Like Syntax Highlighting",
   "description": "Syntax highlighting for VSCode inspired by Roblox Studio syntax highlighting. Requires Luau-lsp to work.",
-  "version": "0.0.5",
+  "version": "0.0.6",
   "publisher": "ThornHall",
   "icon": "studio.png",
   "engines": {

@@ -40,7 +40,8 @@
         {
             "scope": "storage.modifier.local.luau",
             "settings": {
-                "foreground": "#f77575"
+                "foreground": "#f77575",
+                "fontStyle": "bold"
             }
         },
         {
@@ -86,6 +87,20 @@
             }
         },
         {
+            "scope": "constant.language.boolean.true.luau",
+            "settings": {
+                "foreground": "#f77575",
+                "fontStyle": "bold"
+            }
+        },
+        {
+            "scope": "constant.language.boolean.false.luau",
+            "settings": {
+                "foreground": "#f77575",
+                "fontStyle": "bold"
+            }
+        },
+        {
             "scope": "support.function.luau",
             "settings": {
                 "foreground": "#44e7f9"
@@ -106,7 +121,15 @@
         {
             "scope": "variable.language.self.lua",
             "settings": {
-                "foreground": "#f77575"
+                "foreground": "#f77575",
+                "fontStyle": "bold"
+            }
+        },
+        {
+            "scope": "variable.language.self.luau",
+            "settings": {
+                "foreground": "#f77575",
+                "fontStyle": "bold"
             }
         },
         {
