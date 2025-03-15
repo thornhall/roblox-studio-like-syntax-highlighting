@@ -24,8 +24,8 @@
       }
     ],
     "configurationDefaults": {
-        "editor.semanticHighlighting.enabled": true,
-        "editor.bracketPairColorization.enabled": false
+        "editor.bracketPairColorization.enabled": false,
+        "luau-lsp.platform.type": "roblox"
     },
     "extensionDependencies": [
         "johnnymorganz.luau-lsp",
