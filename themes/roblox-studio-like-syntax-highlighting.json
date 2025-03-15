@@ -139,6 +139,12 @@
             }
         },
         {
+            "scope": "comment.line.double-dash.luau",
+            "settings": {
+                "foreground": "#595958"
+            }
+        },
+        {
             "scope": "variable.language.self.lua",
             "settings": {
                 "foreground": "#f77575",
