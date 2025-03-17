@@ -4,4 +4,5 @@ Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syn
 
 [Luau Language Server](https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp) is required for the best experience.
 
+# [New] 03-17-2025 Multi-Language Support 
 ![Preview](images/example.png)
