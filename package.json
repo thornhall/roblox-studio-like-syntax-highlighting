@@ -14,7 +14,20 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/thornhall/roblox-studio-like-syntax-highlighting.git"
-},
+  },
+  "keywords": [
+    "roblox",
+    "luau",
+    "lua",
+    "syntax highlighting",
+    "roblox studio",
+    "theme",
+    "dark theme",
+    "code highlighting",
+    "color theme",
+    "game dev",
+    "scripting"
+  ],
   "contributes": {
     "themes": [
       {
