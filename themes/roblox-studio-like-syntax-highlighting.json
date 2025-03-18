@@ -45,7 +45,11 @@
             }
         },
         {
-            "scope": "string",
+        "scope": [
+            "string.quoted.single",
+            "string.quoted.double",
+            "string"
+        ],
             "settings": {
                 "foreground": "#a7ff91"
             }
@@ -86,15 +90,6 @@
             ],
             "settings": {
                 "foreground": "#fafa9f"
-            }
-        },
-        {
-            "scope": [
-                "string.quoted.single",
-                "string.quoted.double"
-            ],
-            "settings": {
-                "foreground": "#a7ff91"
             }
         },
         {
