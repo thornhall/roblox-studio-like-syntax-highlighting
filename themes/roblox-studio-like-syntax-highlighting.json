@@ -4,11 +4,12 @@
         "editor.background": "#000000",
         "editor.foreground": "#ffffff"
 	},
+    "semanticHighlighting": false,
 	"tokenColors": [
         {
             "scope": [
+                "keyword",
                 "keyword.control",
-                "keyword.operator.comparison",
                 "storage.type",
                 "keyword.control",
                 "storage.modifier",
@@ -50,26 +51,16 @@
             }
         },
         {
-            "scope": "keyword",
-            "settings": {
-                "foreground": "#f77575",
-                "fontStyle": "bold"
-            }
-        },
-        {
             "scope": "entity.name.function",
             "settings": {
                 "foreground": "#fafa9f"
             }
         },
         {
-            "scope": "number",
-            "settings": {
-                "foreground": "#f5ce42"
-            }
-        },
-        {
-            "scope": "constant.language",
+            "scope": [
+                "constant.language",
+                "number"
+            ],
             "settings": {
                 "foreground": "#f5ce42"
             }
@@ -82,8 +73,7 @@
         },
         {
             "scope": [
-                "keyword.operator.assignment",
-                "keyword.operator.comparison"
+                "keyword.operator"
             ],
             "settings": {
                 "foreground": "#f77575"
