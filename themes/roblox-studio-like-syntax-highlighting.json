@@ -18,12 +18,39 @@
 	"tokenColors": [
         {
             "scope": [
+                "keyword.control",
+                "keyword.operator.comparison",
+                "storage.type",
+                "keyword.control",
+                "storage.modifier",
+                "variable.language.special.self",
+                "variable.language.self",
+                "variable.language.super",
+                "variable.language.this"
+            ],
+            "settings": {
+                "foreground": "#f77575",
+                "fontStyle": "bold"
+            }
+        },
+        {
+            "scope": [
                 "comment",
                 "punctuation.definition.comment"
             ],
             "settings": {
                 "foreground": "#595958",
                 "fontStyle": "italic"
+            }
+        },
+        {
+            "scope": [
+                "constant.language.boolean.true",
+                "constant.language.boolean.false"
+            ],
+            "settings": {
+                "foreground": "#f5ce42",
+                "fontStyle": "bold"
             }
         },
         {
@@ -61,23 +88,6 @@
             "scope": "punctuation",
             "settings": {
                 "foreground": "#ffffff"
-            }
-        },
-        {
-            "scope": [
-                "keyword.control",
-                "keyword.operator.comparison",
-                "storage.type",
-                "keyword.control",
-                "storage.modifier",
-                "variable.language.special.self",
-                "variable.language.self",
-                "variable.language.super",
-                "variable.language.this"
-            ],
-            "settings": {
-                "foreground": "#f77575",
-                "fontStyle": "bold"
             }
         },
         {
@@ -129,16 +139,6 @@
             ],
             "settings": {
                 "foreground": "#44e7f9"
-            }
-        },
-        {
-            "scope": [
-                "constant.language.boolean.true",
-                "constant.language.boolean.false"
-            ],
-            "settings": {
-                "foreground": "#f5ce42",
-                "fontStyle": "bold"
             }
         },
         {
