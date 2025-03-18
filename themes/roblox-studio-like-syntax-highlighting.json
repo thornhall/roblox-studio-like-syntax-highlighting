@@ -6,7 +6,11 @@
 	},
     "semanticHighlighting": true,
     "semanticTokenColors": {
-        "*.defaultLibrary": {
+        "variable.defaultLibrary": {
+            "foreground": "#44e7f9",
+            "fontStyle": "bold"
+        },
+        "function.defaultLibrary": {
             "foreground": "#44e7f9",
             "fontStyle": "bold"
         }

@@ -41,9 +41,7 @@
         "luau-lsp.platform.type": "roblox"
     },
     "extensionDependencies": [
-        "johnnymorganz.luau-lsp",
-        "ezzenix.luau-themes",
-        "undermywheel.roblox-lua"
+        "johnnymorganz.luau-lsp"
     ]
   }
 }
