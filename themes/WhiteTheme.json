@@ -1,8 +1,8 @@
 {
-    "name": "Roblox Studio-Light Mode Syntax Highlighting",
+    "name": "LightMode",
     "colors": {
-        "editor.background": "#baadad",
-        "editor.foreground": "#ffffff"
+        "editor.background": "#fff7f7",
+        "editor.foreground": "#1f1a1a"
     },
     "semanticHighlighting": false,
     "tokenColors": [
@@ -20,7 +20,7 @@
                 "variable.language.this"
             ],
             "settings": {
-                "foreground": "#f77575",
+                "foreground": "#140f7d",
                 "fontStyle": "bold"
             }
         },
@@ -30,7 +30,7 @@
                 "punctuation.definition.comment"
             ],
             "settings": {
-                "foreground": "#595958",
+                "foreground": "#27cc98",
                 "fontStyle": "italic"
             }
         },
@@ -40,7 +40,7 @@
                 "constant.language.boolean.false"
             ],
             "settings": {
-                "foreground": "#f5ce42",
+                "foreground": "#158c59",
                 "fontStyle": "bold"
             }
         },
@@ -86,7 +86,7 @@
         {
             "scope": [
                 "support.function",
-                "entity.name.function"
+                "entity.name.function   "
             ],
             "settings": {
                 "foreground": "#fafa9f"
@@ -127,7 +127,7 @@
                 "comment.line"
             ],
             "settings": {
-                "foreground": "#595958"
+                "foreground": "#38a885"
             }
         },
         {

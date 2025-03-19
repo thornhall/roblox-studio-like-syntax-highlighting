@@ -36,7 +36,7 @@
     "contributes": {
         "themes": [
             {
-                "label": "Roblox Studio-Like Syntax Highlight   ing",
+                "label": "Roblox Dark",
                 "uiTheme": "vs-dark",
                 "path": "./themes/DarkTheme.json"
             },

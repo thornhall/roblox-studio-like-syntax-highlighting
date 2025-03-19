@@ -1,11 +1,11 @@
 {
-	"name": "Roblox Studio-Like Syntax Highlighting",
-	"colors": {
+    "name": "DarkMode",
+    "colors": {
         "editor.background": "#000000",
         "editor.foreground": "#ffffff"
-	},
+    },
     "semanticHighlighting": false,
-	"tokenColors": [
+    "tokenColors": [
         {
             "scope": [
                 "keyword",
@@ -45,11 +45,11 @@
             }
         },
         {
-        "scope": [
-            "string.quoted.single",
-            "string.quoted.double",
-            "string"
-        ],
+            "scope": [
+                "string.quoted.single",
+                "string.quoted.double",
+                "string"
+            ],
             "settings": {
                 "foreground": "#a7ff91"
             }
@@ -133,7 +133,7 @@
         {
             "scope": [
                 "constant.numeric",
-                "constant.language.nil"                 
+                "constant.language.nil"
             ],
             "settings": {
                 "foreground": "#f5ce42"

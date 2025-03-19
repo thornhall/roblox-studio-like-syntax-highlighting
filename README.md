@@ -16,3 +16,4 @@ Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syn
 ![Rust Preview](images/rust_example.png)
 
 
+F5 for testing
