@@ -1,13 +1,18 @@
 {
     "name": "roblox-studio-like-syntax-highlighting",
     "displayName": "Roblox Studio-Like Syntax Highlighting",
-    "description": "Syntax highlighting for VSCode inspired by Roblox Studio syntax highlighting. Requires Luau-lsp to work.",
-    "version": "0.1.4",
+    "description": "Syntax highlighting for VSCode inspired by Roblox Studio syntax highlighting. Requires Luau-lsp to work. Now comes with auto-insertion functionality like Roblox Studio!",
+    "version": "1.0.1",
     "publisher": "ThornHall",
     "icon": "studio.png",
     "engines": {
         "vscode": "^1.98.0"
     },
+    "activationEvents": [
+        "onLanguage:lua",
+        "onLanguage:luau"
+    ],
+    "main": "./out/extension.js",
     "categories": [
         "Themes"
     ],
@@ -36,6 +41,20 @@
                 "path": "./themes/roblox-studio-like-syntax-highlighting.json"
             }
         ],
+        "commands": [
+            {
+                "command": "roblox.autoInsertFunctionEnd",
+                "title": "Auto insert end after function keyword"
+            },
+            {
+                "command": "roblox.autoInsertIfThenEnd",
+                "title": "Auto insert end after if keyword"
+            },
+            {
+                "command": "roblox.autoInsertDo",
+                "title": "Auto insert do after while and for keywords"
+            }
+        ],
         "configurationDefaults": {
             "editor.bracketPairColorization.enabled": false,
             "luau-lsp.platform.type": "roblox",
@@ -49,5 +68,12 @@
         "extensionDependencies": [
             "johnnymorganz.luau-lsp"
         ]
+    },
+    "dependencies": {
+        "typescript": "^5.8.2"
+    },
+    "devDependencies": {
+        "@types/vscode": "^1.98.0",
+        "@vscode/test-electron": "^2.4.1"
     }
 }
