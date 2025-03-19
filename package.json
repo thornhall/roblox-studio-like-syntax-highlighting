@@ -36,9 +36,14 @@
     "contributes": {
         "themes": [
             {
-                "label": "Roblox Studio-Like Syntax Highlighting",
+                "label": "Roblox Studio-Like Syntax Highlight   ing",
                 "uiTheme": "vs-dark",
-                "path": "./themes/roblox-studio-like-syntax-highlighting.json"
+                "path": "./themes/DarkTheme.json"
+            },
+            {
+                "label": "Roblox Light",
+                "uiTheme": "vs",
+                "path": "./themes/WhiteTheme.json"
             }
         ],
         "commands": [
@@ -55,16 +60,6 @@
                 "title": "Auto insert do after while and for keywords"
             }
         ],
-        "configurationDefaults": {
-            "editor.bracketPairColorization.enabled": false,
-            "luau-lsp.platform.type": "roblox",
-            "[lua]": {
-                "editor.semanticHighlighting.enabled": false
-            },
-            "[luau]": {
-                "editor.semanticHighlighting.enabled": false
-            }
-        },
         "extensionDependencies": [
             "johnnymorganz.luau-lsp"
         ]
