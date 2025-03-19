@@ -69,6 +69,11 @@
             "johnnymorganz.luau-lsp"
         ]
     },
+    "scripts": {
+        "build": "tsc",
+        "watch": "tsc --watch",
+        "prepublish": "npm run build"
+    },
     "dependencies": {
         "typescript": "^5.8.2"
     },
