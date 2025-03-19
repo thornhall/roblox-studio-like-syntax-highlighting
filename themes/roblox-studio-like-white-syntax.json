@@ -1,0 +1,143 @@
+{
+    "name": "Roblox Studio-Light Mode Syntax Highlighting",
+    "colors": {
+        "editor.background": "#baadad",
+        "editor.foreground": "#ffffff"
+    },
+    "semanticHighlighting": false,
+    "tokenColors": [
+        {
+            "scope": [
+                "keyword",
+                "keyword.control",
+                "storage.type",
+                "keyword.control",
+                "storage.modifier",
+                "variable.language.special.self",
+                "variable.language.self",
+                "variable.language.self.luau",
+                "variable.language.super",
+                "variable.language.this"
+            ],
+            "settings": {
+                "foreground": "#f77575",
+                "fontStyle": "bold"
+            }
+        },
+        {
+            "scope": [
+                "comment",
+                "punctuation.definition.comment"
+            ],
+            "settings": {
+                "foreground": "#595958",
+                "fontStyle": "italic"
+            }
+        },
+        {
+            "scope": [
+                "constant.language.boolean.true",
+                "constant.language.boolean.false"
+            ],
+            "settings": {
+                "foreground": "#f5ce42",
+                "fontStyle": "bold"
+            }
+        },
+        {
+            "scope": [
+                "string.quoted.single",
+                "string.quoted.double",
+                "string"
+            ],
+            "settings": {
+                "foreground": "#a7ff91"
+            }
+        },
+        {
+            "scope": "entity.name.function",
+            "settings": {
+                "foreground": "#fafa9f"
+            }
+        },
+        {
+            "scope": [
+                "constant.language",
+                "number"
+            ],
+            "settings": {
+                "foreground": "#f5ce42"
+            }
+        },
+        {
+            "scope": "punctuation",
+            "settings": {
+                "foreground": "#ffffff"
+            }
+        },
+        {
+            "scope": [
+                "keyword.operator"
+            ],
+            "settings": {
+                "foreground": "#f77575"
+            }
+        },
+        {
+            "scope": [
+                "support.function",
+                "entity.name.function"
+            ],
+            "settings": {
+                "foreground": "#fafa9f"
+            }
+        },
+        {
+            "scope": [
+                "entity.other.attribute",
+                "variable.language.metamethod",
+                "variable.other.property",
+                "meta.attribute",
+                "meta.member.access"
+            ],
+            "settings": {
+                "foreground": "#61a1f0"
+            }
+        },
+        {
+            "scope": [
+                "entity.name.type",
+                "keyword.function",
+                "support.function",
+                "constant.language.luau",
+                "support.type"
+            ],
+            "settings": {
+                "foreground": "#44e7f9"
+            }
+        },
+        {
+            "scope": "string.quoted",
+            "settings": {
+                "foreground": "#a7ff91"
+            }
+        },
+        {
+            "scope": [
+                "comment.line"
+            ],
+            "settings": {
+                "foreground": "#595958"
+            }
+        },
+        {
+            "scope": [
+                "constant.numeric",
+                "constant.language.nil"
+            ],
+            "settings": {
+                "foreground": "#f5ce42"
+            }
+        }
+    ]
+}
