@@ -51,13 +51,13 @@
                 "string"
             ],
             "settings": {
-                "foreground": "#a7ff91"
+                "foreground": "#2abf19"
             }
         },
         {
             "scope": "entity.name.function",
             "settings": {
-                "foreground": "#fafa9f"
+                "foreground": "#ab6565"
             }
         },
         {
@@ -89,7 +89,7 @@
                 "entity.name.function   "
             ],
             "settings": {
-                "foreground": "#fafa9f"
+                "foreground": "#ab6565"
             }
         },
         {
@@ -101,7 +101,7 @@
                 "meta.member.access"
             ],
             "settings": {
-                "foreground": "#61a1f0"
+                "foreground": "#1F1A1A"
             }
         },
         {
@@ -127,7 +127,7 @@
                 "comment.line"
             ],
             "settings": {
-                "foreground": "#38a885"
+                "foreground": "#0e6bc2"
             }
         },
         {
@@ -136,7 +136,7 @@
                 "constant.language.nil"
             ],
             "settings": {
-                "foreground": "#f5ce42"
+                "foreground": "#38A885"
             }
         }
     ]
