@@ -106,32 +106,6 @@ function areScopesFullyClosed(doc) {
     }
     return false;
 }
-// const typeDefinitionCache: Map<string, vscode.Location[]> = new Map();
-// const typeToFileMap: Map<string, string> = new Map();
-// async function findTypeDefinitionInWorkspace(typeName: string): Promise<vscode.Location[]> {
-//     if (typeDefinitionCache.has(typeName)) {
-//         return typeDefinitionCache.get(typeName)!;
-//     }
-//     const files = await vscode.workspace.findFiles('**/*.{lua,luau}', '**/node_modules/**');
-//     const regex = new RegExp(`\\b(export\\s+)?type\\s+${typeName}\\b`);
-//     for (const file of files) {
-//         const document = await vscode.workspace.openTextDocument(file);
-//         const text = document.getText();
-//         const match = regex.exec(text);
-//         if (match) {
-//             const index = match.index;
-//             const position = document.positionAt(index);
-//             const location = new vscode.Location(file, position);
-//             // Cache result
-//             typeDefinitionCache.set(typeName, [location]);
-//             typeToFileMap.set(typeName, file.fsPath);
-//             return [location];
-//         }
-//     }
-//     // Not found: cache empty result to avoid repeated scanning
-//     typeDefinitionCache.set(typeName, []);
-//     return [];
-// }
 const definitionCache = new Map();
 const symbolToFileMap = new Map();
 function findSymbolDefinitionInWorkspace(symbolName) {
@@ -191,7 +165,7 @@ function activate(context) {
         }
     };
     context.subscriptions.push(vscode.languages.registerDefinitionProvider({ language: 'luau' }, provider));
-    const insertFunctionEnd = vscode.commands.registerCommand('roblox.autoInsertFunctionEnd', (hasParenthesesAlready) => __awaiter(this, void 0, void 0, function* () {
+    const insertFunctionEnd = vscode.commands.registerCommand('roblox.autoInsertFunctionEnd', () => __awaiter(this, void 0, void 0, function* () {
         const editor = vscode.window.activeTextEditor;
         if (!editor)
             return;
@@ -205,23 +179,41 @@ function activate(context) {
         const indent = indentMatch ? indentMatch[1] : "";
         const currentLine = doc.lineAt(pos.line);
         const nextLine = doc.lineAt(pos.line + 1);
+        const nextNextLine = doc.lineAt(pos.line + 3);
+        function countParens(line) {
+            const openMatches = line.match(/\(/g);
+            const closedMatches = line.match(/\)/g);
+            const openMatchesCount = openMatches ? openMatches.length : 0;
+            const closedMatchesCount = closedMatches ? closedMatches.length : 0;
+            return [openMatchesCount, closedMatchesCount];
+        }
+        const indentation = getIndentation(editor);
+        const [openParensCount, closedParensCount] = countParens(currentLine.text);
+        const parenthesesToFill = openParensCount > closedParensCount ? ")".repeat(openParensCount - closedParensCount) : "";
+        const afterFunctionParentheses = (openParensCount > 0 && closedParensCount > 0) ? "" : "()";
         yield editor.edit(edit => {
-            const fullRange = new vscode.Range(currentLine.range.start, nextLine.range.end);
-            const parentheses = hasParenthesesAlready ? "" : "()";
-            let newText = `${beforeCursor}${parentheses}\n${nextLine.text}\n${indent}end${afterCursor}`;
-            if (nextLine.text.includes(")")) {
-                const afterText = ")";
-                const indentNextLineMatch = nextLine.text.match(/^(\s*)/);
-                const indentNextLine = indentNextLineMatch ? indentNextLineMatch[1] : "";
-                const indentToAdd = getIndentation(editor);
-                newText = `${beforeCursor}${parentheses}\n${indentNextLine}${indentToAdd}\n${indent}end${afterText}`;
-            }
+            const fullRange = new vscode.Range(currentLine.range.start, currentLine.range.end);
+            let newText = `${beforeCursor}`;
             edit.replace(fullRange, newText);
         }, {
             undoStopBefore: false,
             undoStopAfter: false
         });
-        if (!hasParenthesesAlready) {
+        yield editor.edit(edit => {
+            const fullRange = new vscode.Range(currentLine.range.start, currentLine.range.end);
+            let newText = `${beforeCursor}${afterFunctionParentheses}\n${indent}${indentation}\n${indent}end${parenthesesToFill}`;
+            edit.replace(fullRange, newText);
+        }, {
+            undoStopBefore: false,
+            undoStopAfter: false
+        });
+        yield editor.edit(edit => {
+            edit.delete(nextNextLine.rangeIncludingLineBreak);
+        }, {
+            undoStopBefore: false,
+            undoStopAfter: false
+        });
+        if (afterFunctionParentheses) {
             const newCursorPos = new vscode.Position(pos.line, beforeCursor.length + 1); // +1 for '('
             editor.selection = new vscode.Selection(newCursorPos, newCursorPos);
         }
@@ -299,31 +291,28 @@ function activate(context) {
         const changes = event.contentChanges;
         if (changes.length === 0)
             return;
-        // Invalidate Go To Type cache entries on file change
-        const changedFilePath = event.document.uri.fsPath;
-        for (const [symbolName, filePath] of symbolToFileMap.entries()) {
-            if (filePath === changedFilePath) {
-                definitionCache.delete(symbolName);
-                symbolToFileMap.delete(symbolName);
-            }
-        }
         const editor = vscode.window.activeTextEditor;
         if (!editor || editor.document !== event.document)
             return;
         const lastChange = changes[changes.length - 1];
         if (lastChange.text.includes("\n")) {
+            // Invalidate Go To Type cache entries on file change
+            const changedFilePath = event.document.uri.fsPath;
+            for (const [symbolName, filePath] of symbolToFileMap.entries()) {
+                if (filePath === changedFilePath) {
+                    definitionCache.delete(symbolName);
+                    symbolToFileMap.delete(symbolName);
+                }
+            }
             const position = lastChange.range.start;
             const currentLineText = event.document.lineAt(position.line).text;
             const pos = editor.selection.active;
             const beforeCursor = currentLineText.substring(0, pos.character);
-            let hasParentheses = false;
-            if (beforeCursor.includes("(") && beforeCursor.includes(")"))
-                hasParentheses = true;
             const matchesFunction = FUNCTION_REGEX.test(beforeCursor);
             if (matchesFunction) {
                 if (areScopesFullyClosed(editor.document))
                     return;
-                vscode.commands.executeCommand('roblox.autoInsertFunctionEnd', hasParentheses);
+                vscode.commands.executeCommand('roblox.autoInsertFunctionEnd');
                 return;
             }
             const matchesFor = FOR_REGEX.test(beforeCursor);
