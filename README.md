@@ -1,4 +1,4 @@
-# Roblox IDE
+# Roblox Studio-Like Syntax Highlighting
 
 Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syntax highlighting in VSCode. Now it comes with auto-insertion functionality like Roblox Studio!
 
