@@ -70,9 +70,9 @@ function areScopesFullyClosed(doc: vscode.TextDocument): boolean {
     return false; 
 }
 
-const definitionCache: Map<string, vscode.Location[]> = new Map();
+const definitionCache: Map<string, vscode.Location | null> = new Map();
 const symbolToFileMap: Map<string, string> = new Map();
-async function findSymbolDefinitionInWorkspace(symbolName: string): Promise<vscode.Location[]> {
+async function findSymbolDefinitionInWorkspace(symbolName: string): Promise<vscode.Location | null> {
     if (definitionCache.has(symbolName)) {
         return definitionCache.get(symbolName)!;
     }
@@ -81,11 +81,7 @@ async function findSymbolDefinitionInWorkspace(symbolName: string): Promise<vsco
 
     const regexPatterns = [
         new RegExp(`\\b(export\\s+)?type\\s+${symbolName}\\b`),                          // type declaration
-        new RegExp(`function\\s+${symbolName}\\s*\\(`),                                  // global function
-        new RegExp(`local\\s+function\\s+${symbolName}\\s*\\(`),                         // local function
-        new RegExp(`${symbolName}\\s*=\\s*function\\s*\\(`),                             // assignment function
         new RegExp(`function\\s+[A-Za-z_][A-Za-z0-9_]*\\:${symbolName}\\s*\\(`),         // class method
-        new RegExp(`function\\s+[A-Za-z_][A-Za-z0-9_]*\\.${symbolName}\\s*\\(`)          // static method
     ];
 
     for (const file of files) {
@@ -100,17 +96,17 @@ async function findSymbolDefinitionInWorkspace(symbolName: string): Promise<vsco
                 const location = new vscode.Location(file, position);
 
                 // Cache the result
-                definitionCache.set(symbolName, [location]);
+                definitionCache.set(symbolName, location);
                 symbolToFileMap.set(symbolName, file.fsPath);
 
-                return [location];
+                return location;
             }
         }
     }
 
     // Not found: cache empty to avoid re-scanning
-    definitionCache.set(symbolName, []);
-    return [];
+    definitionCache.set(symbolName, null);
+    return null;
 }
 
 
@@ -133,6 +129,7 @@ export function activate(context: vscode.ExtensionContext) {
 
             const symbolName = document.getText(wordRange);
             const locations = await findSymbolDefinitionInWorkspace(symbolName);
+            console.log("Locations:", locations)
             return locations;
         }
     };
@@ -156,7 +153,6 @@ export function activate(context: vscode.ExtensionContext) {
 
         const currentLine = doc.lineAt(pos.line);
         const nextLine = doc.lineAt(pos.line + 1);
-        const nextNextLine = doc.lineAt(pos.line + 3)
 
         function countParens(line: string): [number, number] {
             const openMatches = line.match(/\(/g);
@@ -171,7 +167,6 @@ export function activate(context: vscode.ExtensionContext) {
         const [openParensCount, closedParensCount] = countParens(currentLine.text)
         const parenthesesToFill = openParensCount > closedParensCount ? ")".repeat(openParensCount - closedParensCount) : ""
         const afterFunctionParentheses = (openParensCount > 0 && closedParensCount > 0) ? "" : "()"
-
 
         await editor.edit(edit => {
             const fullRange = new vscode.Range(currentLine.range.start, currentLine.range.end);
@@ -195,6 +190,7 @@ export function activate(context: vscode.ExtensionContext) {
             undoStopAfter: false
         });
 
+        const nextNextLine = doc.lineAt(pos.line + 3)
         await editor.edit(edit => {
             edit.delete(nextNextLine.rangeIncludingLineBreak);
         }, {

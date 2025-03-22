@@ -116,11 +116,7 @@ function findSymbolDefinitionInWorkspace(symbolName) {
         const files = yield vscode.workspace.findFiles('**/*.{lua,luau}', '**/node_modules/**');
         const regexPatterns = [
             new RegExp(`\\b(export\\s+)?type\\s+${symbolName}\\b`), // type declaration
-            new RegExp(`function\\s+${symbolName}\\s*\\(`), // global function
-            new RegExp(`local\\s+function\\s+${symbolName}\\s*\\(`), // local function
-            new RegExp(`${symbolName}\\s*=\\s*function\\s*\\(`), // assignment function
             new RegExp(`function\\s+[A-Za-z_][A-Za-z0-9_]*\\:${symbolName}\\s*\\(`), // class method
-            new RegExp(`function\\s+[A-Za-z_][A-Za-z0-9_]*\\.${symbolName}\\s*\\(`) // static method
         ];
         for (const file of files) {
             const document = yield vscode.workspace.openTextDocument(file);
@@ -132,15 +128,15 @@ function findSymbolDefinitionInWorkspace(symbolName) {
                     const position = document.positionAt(index);
                     const location = new vscode.Location(file, position);
                     // Cache the result
-                    definitionCache.set(symbolName, [location]);
+                    definitionCache.set(symbolName, location);
                     symbolToFileMap.set(symbolName, file.fsPath);
-                    return [location];
+                    return location;
                 }
             }
         }
         // Not found: cache empty to avoid re-scanning
-        definitionCache.set(symbolName, []);
-        return [];
+        definitionCache.set(symbolName, null);
+        return null;
     });
 }
 function activate(context) {
@@ -160,6 +156,7 @@ function activate(context) {
                     return;
                 const symbolName = document.getText(wordRange);
                 const locations = yield findSymbolDefinitionInWorkspace(symbolName);
+                console.log("Locations:", locations);
                 return locations;
             });
         }
@@ -179,7 +176,6 @@ function activate(context) {
         const indent = indentMatch ? indentMatch[1] : "";
         const currentLine = doc.lineAt(pos.line);
         const nextLine = doc.lineAt(pos.line + 1);
-        const nextNextLine = doc.lineAt(pos.line + 3);
         function countParens(line) {
             const openMatches = line.match(/\(/g);
             const closedMatches = line.match(/\)/g);
@@ -207,6 +203,7 @@ function activate(context) {
             undoStopBefore: false,
             undoStopAfter: false
         });
+        const nextNextLine = doc.lineAt(pos.line + 3);
         yield editor.edit(edit => {
             edit.delete(nextNextLine.rangeIncludingLineBreak);
         }, {
