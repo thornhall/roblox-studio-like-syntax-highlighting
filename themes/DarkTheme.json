@@ -1,8 +1,14 @@
 {
-    "name": "DarkMode",
+    "name": "Roblox Dark",
     "colors": {
         "editor.background": "#000000",
-        "editor.foreground": "#ffffff"
+        "editor.foreground": "#ffffff",
+        "editorBracketHighlight.foreground2": "#f77575",
+        "editorBracketHighlight.foreground1": "#FFFFFF",
+        "editorBracketHighlight.foreground4": "#FFFFFF",
+        "editorBracketHighlight.foreground3": "#f5ce42",
+        "editorBracketHighlight.foreground5": "#f77575",
+        "editorBracketHighlight.foreground6": "#f5ce42"
     },
     "semanticHighlighting": false,
     "tokenColors": [
@@ -48,7 +54,8 @@
             "scope": [
                 "string.quoted.single",
                 "string.quoted.double",
-                "string"
+                "string",
+                "punctuation.definition.string"
             ],
             "settings": {
                 "foreground": "#a7ff91"
@@ -77,7 +84,8 @@
         },
         {
             "scope": [
-                "keyword.operator"
+                "keyword.operator",
+                "meta.template.expression.ts"
             ],
             "settings": {
                 "foreground": "#f77575"
@@ -137,6 +145,14 @@
             ],
             "settings": {
                 "foreground": "#f5ce42"
+            }
+        },
+        {
+            "scope": [
+                "punctuation.definition.template-expression"
+            ],
+            "settings": {
+                "foreground": "#fafa9f"
             }
         }
     ]

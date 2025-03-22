@@ -106,7 +106,48 @@ function areScopesFullyClosed(doc) {
     }
     return false;
 }
+const typeDefinitionCache = new Map();
+const typeToFileMap = new Map();
+function findTypeDefinitionInWorkspace(typeName) {
+    return __awaiter(this, void 0, void 0, function* () {
+        if (typeDefinitionCache.has(typeName)) {
+            return typeDefinitionCache.get(typeName);
+        }
+        const files = yield vscode.workspace.findFiles('**/*.{lua,luau}', '**/node_modules/**');
+        const regex = new RegExp(`\\b(export\\s+)?type\\s+${typeName}\\b`);
+        for (const file of files) {
+            const document = yield vscode.workspace.openTextDocument(file);
+            const text = document.getText();
+            const match = regex.exec(text);
+            if (match) {
+                const index = match.index;
+                const position = document.positionAt(index);
+                const location = new vscode.Location(file, position);
+                // Cache result
+                typeDefinitionCache.set(typeName, [location]);
+                typeToFileMap.set(typeName, file.fsPath);
+                return [location];
+            }
+        }
+        // Not found: cache empty result to avoid repeated scanning
+        typeDefinitionCache.set(typeName, []);
+        return [];
+    });
+}
 function activate(context) {
+    const provider = {
+        provideDefinition(document, position, token) {
+            return __awaiter(this, void 0, void 0, function* () {
+                const wordRange = document.getWordRangeAtPosition(position);
+                if (!wordRange)
+                    return;
+                const typeName = document.getText(wordRange);
+                const locations = yield findTypeDefinitionInWorkspace(typeName);
+                return locations;
+            });
+        }
+    };
+    context.subscriptions.push(vscode.languages.registerDefinitionProvider({ language: 'luau' }, provider));
     const insertFunctionEnd = vscode.commands.registerCommand('roblox.autoInsertFunctionEnd', (hasParenthesesAlready) => __awaiter(this, void 0, void 0, function* () {
         const editor = vscode.window.activeTextEditor;
         if (!editor)
@@ -215,6 +256,14 @@ function activate(context) {
         const changes = event.contentChanges;
         if (changes.length === 0)
             return;
+        // Invalidate Go To Type cache entries on file change
+        const changedFilePath = event.document.uri.fsPath;
+        for (const [typeName, filePath] of typeToFileMap.entries()) {
+            if (filePath === changedFilePath) {
+                typeDefinitionCache.delete(typeName);
+                typeToFileMap.delete(typeName);
+            }
+        }
         const editor = vscode.window.activeTextEditor;
         if (!editor || editor.document !== event.document)
             return;

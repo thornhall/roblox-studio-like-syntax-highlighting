@@ -70,7 +70,57 @@ function areScopesFullyClosed(doc: vscode.TextDocument): boolean {
     return false; 
 }
 
+const typeDefinitionCache: Map<string, vscode.Location[]> = new Map();
+const typeToFileMap: Map<string, string> = new Map();
+async function findTypeDefinitionInWorkspace(typeName: string): Promise<vscode.Location[]> {
+    if (typeDefinitionCache.has(typeName)) {
+        return typeDefinitionCache.get(typeName)!;
+    }
+
+    const files = await vscode.workspace.findFiles('**/*.{lua,luau}', '**/node_modules/**');
+    const regex = new RegExp(`\\b(export\\s+)?type\\s+${typeName}\\b`);
+
+    for (const file of files) {
+        const document = await vscode.workspace.openTextDocument(file);
+        const text = document.getText();
+        const match = regex.exec(text);
+
+        if (match) {
+            const index = match.index;
+            const position = document.positionAt(index);
+            const location = new vscode.Location(file, position);
+
+            // Cache result
+            typeDefinitionCache.set(typeName, [location]);
+            typeToFileMap.set(typeName, file.fsPath);
+
+            return [location];
+        }
+    }
+
+    // Not found: cache empty result to avoid repeated scanning
+    typeDefinitionCache.set(typeName, []);
+    return [];
+}
+
+
 export function activate(context: vscode.ExtensionContext) {
+
+    const provider: vscode.DefinitionProvider = {
+        async provideDefinition(document, position, token) {
+            const wordRange = document.getWordRangeAtPosition(position);
+            if (!wordRange) return;
+
+            const typeName = document.getText(wordRange);
+            const locations = await findTypeDefinitionInWorkspace(typeName);
+            return locations;
+        }
+    };
+
+    context.subscriptions.push(
+        vscode.languages.registerDefinitionProvider({ language: 'luau' }, provider)
+    );
+
     const insertFunctionEnd = vscode.commands.registerCommand('roblox.autoInsertFunctionEnd', async (hasParenthesesAlready: boolean) => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) return;
@@ -198,6 +248,15 @@ export function activate(context: vscode.ExtensionContext) {
     vscode.workspace.onDidChangeTextDocument(event => {
         const changes = event.contentChanges;
         if (changes.length === 0) return;
+
+        // Invalidate Go To Type cache entries on file change
+        const changedFilePath = event.document.uri.fsPath;
+        for (const [typeName, filePath] of typeToFileMap.entries()) {
+            if (filePath === changedFilePath) {
+                typeDefinitionCache.delete(typeName);
+                typeToFileMap.delete(typeName);
+            }
+        }
         
         const editor = vscode.window.activeTextEditor;
         if (!editor || editor.document !== event.document) return;
