@@ -70,49 +70,102 @@ function areScopesFullyClosed(doc: vscode.TextDocument): boolean {
     return false; 
 }
 
-const typeDefinitionCache: Map<string, vscode.Location[]> = new Map();
-const typeToFileMap: Map<string, string> = new Map();
-async function findTypeDefinitionInWorkspace(typeName: string): Promise<vscode.Location[]> {
-    if (typeDefinitionCache.has(typeName)) {
-        return typeDefinitionCache.get(typeName)!;
+// const typeDefinitionCache: Map<string, vscode.Location[]> = new Map();
+// const typeToFileMap: Map<string, string> = new Map();
+// async function findTypeDefinitionInWorkspace(typeName: string): Promise<vscode.Location[]> {
+//     if (typeDefinitionCache.has(typeName)) {
+//         return typeDefinitionCache.get(typeName)!;
+//     }
+
+//     const files = await vscode.workspace.findFiles('**/*.{lua,luau}', '**/node_modules/**');
+//     const regex = new RegExp(`\\b(export\\s+)?type\\s+${typeName}\\b`);
+
+//     for (const file of files) {
+//         const document = await vscode.workspace.openTextDocument(file);
+//         const text = document.getText();
+//         const match = regex.exec(text);
+
+//         if (match) {
+//             const index = match.index;
+//             const position = document.positionAt(index);
+//             const location = new vscode.Location(file, position);
+
+//             // Cache result
+//             typeDefinitionCache.set(typeName, [location]);
+//             typeToFileMap.set(typeName, file.fsPath);
+
+//             return [location];
+//         }
+//     }
+
+//     // Not found: cache empty result to avoid repeated scanning
+//     typeDefinitionCache.set(typeName, []);
+//     return [];
+// }
+
+const definitionCache: Map<string, vscode.Location[]> = new Map();
+const symbolToFileMap: Map<string, string> = new Map();
+async function findSymbolDefinitionInWorkspace(symbolName: string): Promise<vscode.Location[]> {
+    if (definitionCache.has(symbolName)) {
+        return definitionCache.get(symbolName)!;
     }
 
     const files = await vscode.workspace.findFiles('**/*.{lua,luau}', '**/node_modules/**');
-    const regex = new RegExp(`\\b(export\\s+)?type\\s+${typeName}\\b`);
+
+    const regexPatterns = [
+        new RegExp(`\\b(export\\s+)?type\\s+${symbolName}\\b`),                          // type declaration
+        new RegExp(`function\\s+${symbolName}\\s*\\(`),                                  // global function
+        new RegExp(`local\\s+function\\s+${symbolName}\\s*\\(`),                         // local function
+        new RegExp(`${symbolName}\\s*=\\s*function\\s*\\(`),                             // assignment function
+        new RegExp(`function\\s+[A-Za-z_][A-Za-z0-9_]*\\:${symbolName}\\s*\\(`),         // class method
+        new RegExp(`function\\s+[A-Za-z_][A-Za-z0-9_]*\\.${symbolName}\\s*\\(`)          // static method
+    ];
 
     for (const file of files) {
         const document = await vscode.workspace.openTextDocument(file);
         const text = document.getText();
-        const match = regex.exec(text);
 
-        if (match) {
-            const index = match.index;
-            const position = document.positionAt(index);
-            const location = new vscode.Location(file, position);
+        for (const regex of regexPatterns) {
+            const match = regex.exec(text);
+            if (match) {
+                const index = match.index;
+                const position = document.positionAt(index);
+                const location = new vscode.Location(file, position);
 
-            // Cache result
-            typeDefinitionCache.set(typeName, [location]);
-            typeToFileMap.set(typeName, file.fsPath);
+                // Cache the result
+                definitionCache.set(symbolName, [location]);
+                symbolToFileMap.set(symbolName, file.fsPath);
 
-            return [location];
+                return [location];
+            }
         }
     }
 
-    // Not found: cache empty result to avoid repeated scanning
-    typeDefinitionCache.set(typeName, []);
+    // Not found: cache empty to avoid re-scanning
+    definitionCache.set(symbolName, []);
     return [];
 }
 
 
 export function activate(context: vscode.ExtensionContext) {
 
+    const cacheClearInterval = setInterval(() => {
+        definitionCache.clear();
+        symbolToFileMap.clear();
+        console.log("[Roblox IDE] Definition cache cleared.");
+    }, 3600000); // 1 hour in milliseconds
+
+    context.subscriptions.push({
+        dispose: () => clearInterval(cacheClearInterval)
+    });
+
     const provider: vscode.DefinitionProvider = {
         async provideDefinition(document, position, token) {
             const wordRange = document.getWordRangeAtPosition(position);
             if (!wordRange) return;
 
-            const typeName = document.getText(wordRange);
-            const locations = await findTypeDefinitionInWorkspace(typeName);
+            const symbolName = document.getText(wordRange);
+            const locations = await findSymbolDefinitionInWorkspace(symbolName);
             return locations;
         }
     };
@@ -251,10 +304,10 @@ export function activate(context: vscode.ExtensionContext) {
 
         // Invalidate Go To Type cache entries on file change
         const changedFilePath = event.document.uri.fsPath;
-        for (const [typeName, filePath] of typeToFileMap.entries()) {
+        for (const [symbolName, filePath] of symbolToFileMap.entries()) {
             if (filePath === changedFilePath) {
-                typeDefinitionCache.delete(typeName);
-                typeToFileMap.delete(typeName);
+                definitionCache.delete(symbolName);
+                symbolToFileMap.delete(symbolName);
             }
         }
         
