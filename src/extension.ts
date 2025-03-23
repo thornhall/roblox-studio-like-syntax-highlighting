@@ -136,7 +136,6 @@ export function activate(context: vscode.ExtensionContext) {
         const currentLine = document.lineAt(cursorPos.line);
         const lineText = currentLine.text;
         const beforeCursor = lineText.substring(0, cursorPos.character);
-
         if (beforeCursor == "") {
             // Default behavior of paste when there is no indentation present works fine, so we do nothing special for this case
             await vscode.commands.executeCommand("editor.action.clipboardPasteAction");
