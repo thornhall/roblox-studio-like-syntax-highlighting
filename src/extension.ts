@@ -9,6 +9,8 @@ const FOR_REGEX = /\bfor\b/
 const WHILE_REGEX = /\bwhile\b/
 const REPEAT_REGEX = /\brepeat\b/
 const UNTIL_REGEX = /\buntil\b/
+const ELSEIF_REGEX = /\belseif\b/
+const ELSE_REGEX = /\belse\b/
 
 
 function getIndentation(editor: vscode.TextEditor): string {
@@ -262,7 +264,7 @@ export function activate(context: vscode.ExtensionContext) {
     });
 
 
-    const insertIfThenEnd = vscode.commands.registerCommand("roblox.autoInsertIfThenEnd", async (hasThenAlready: boolean) => {
+    const insertIfThenEnd = vscode.commands.registerCommand("roblox.autoInsertIfThenEnd", async (hasThenAlready: boolean, isElse: boolean) => {
         const editor = vscode.window.activeTextEditor;
         if (!editor) return;
 
@@ -279,14 +281,14 @@ export function activate(context: vscode.ExtensionContext) {
 
         await editor.edit(edit => {
             const fullRange = new vscode.Range(currentLine.range.start, nextLine.range.end);
-            const then = hasThenAlready ? "" : "then";
+            const then = hasThenAlready || isElse ? "" : "then";
 
             const indentNextLineMatch = nextLine.text.match(/^(\s*)/);
             const indentNextLine = indentNextLineMatch ? indentNextLineMatch[1] : ""
             const indentToAdd = getIndentation(editor)
-    
+            
             let newText = `${beforeCursor} ${then}\n${indentNextLine}\n${indent}end`;
-            if (!hasThenAlready) newText = `${beforeCursor} ${then}\n${indentNextLine}${indentToAdd}\n${indent}end`;
+            if (!hasThenAlready && !isElse) newText = `${beforeCursor} ${then}\n${indentNextLine}${indentToAdd}\n${indent}end`;
 
             edit.replace(fullRange, newText);
         }, {
@@ -414,13 +416,16 @@ export function activate(context: vscode.ExtensionContext) {
             const matchesIf = IF_REGEX.test(beforeCursor)
             const matchesThen = THEN_REGEX.test(beforeCursor)
             const matchesRepeat = REPEAT_REGEX.test(beforeCursor)
+            const matchesElseIf = ELSEIF_REGEX.test(beforeCursor)
+            const matchesElse = ELSE_REGEX.test(beforeCursor)
+
 
             if (matchesFor || matchesWhile) {
                 if (areScopesFullyClosed(editor.document)) return
                 vscode.commands.executeCommand("roblox.autoInsertDo", matchesDo);
-            } else if (matchesIf) {
+            } else if (matchesIf || matchesElseIf || matchesElse) {
                 if (areScopesFullyClosed(editor.document)) return 
-                vscode.commands.executeCommand("roblox.autoInsertIfThenEnd", matchesThen);
+                vscode.commands.executeCommand("roblox.autoInsertIfThenEnd", matchesThen, matchesElse);
             } else if (matchesRepeat) {
                 if (areScopesFullyClosed(editor.document)) return
                 vscode.commands.executeCommand("roblox.autoInsertUntil");

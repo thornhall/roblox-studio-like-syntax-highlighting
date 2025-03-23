@@ -6,10 +6,12 @@ Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syn
 
 # [New 03-23-2025] Smart Indent On Paste
 
-## Current behvaior WITHOUT smart indent enabled
+Ever tried to paste some code you copied and the indentation gets all messed up when you paste it? Smart Indent On Paste aims to solve this problem. 
+
+## Current behavior WITHOUT smart indent enabled
 ![PasteWithout](images/pastewithout.gif)
 
-## Current behvaior WITH smart indent enabled
+## Current behavior WITH smart indent enabled
 ![PasteWith](images/pastewith.gif)
 
 # [New 03-21-2025] [Basic Support] Use control + click or command + click to Go To Function definition
