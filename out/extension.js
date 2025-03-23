@@ -146,6 +146,59 @@ function findSymbolDefinitionInWorkspace(symbolName) {
     });
 }
 function activate(context) {
+    const formatOnPaste = vscode.commands.registerCommand("smartPasteIndent.paste", () => __awaiter(this, void 0, void 0, function* () {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor)
+            return;
+        const config = vscode.workspace.getConfiguration();
+        const enabled = config.get("robloxIDE.smartPasteIndent.enabled", true);
+        const languageId = editor.document.languageId;
+        if (!enabled || (languageId !== "lua" && languageId !== "luau")) {
+            yield vscode.commands.executeCommand("editor.action.clipboardPasteAction");
+            return;
+        }
+        const document = editor.document;
+        const cursorPos = editor.selection.active;
+        const currentLine = document.lineAt(cursorPos.line);
+        const lineText = currentLine.text;
+        const beforeCursor = lineText.substring(0, cursorPos.character);
+        if (beforeCursor == "") {
+            // Default behavior of paste when there is no indentation present works fine, so we do nothing special for this case
+            yield vscode.commands.executeCommand("editor.action.clipboardPasteAction");
+            return;
+        }
+        // Get clipboard text
+        const clipboardText = yield vscode.env.clipboard.readText();
+        const pastedLines = clipboardText.split('\n');
+        yield vscode.commands.executeCommand('default:paste');
+        // Determine smallest indent in pasted content (ignores blank lines)
+        let minPastedIndentLength = Number.MAX_SAFE_INTEGER;
+        for (const line of pastedLines) {
+            if (line.trim().length === 0)
+                continue;
+            const match = line.match(/^(\s*)/);
+            const indent = match ? match[1] : '';
+            if (indent.length < minPastedIndentLength) {
+                minPastedIndentLength = indent.length;
+            }
+        }
+        if (minPastedIndentLength === Number.MAX_SAFE_INTEGER) {
+            minPastedIndentLength = 0; // All lines were blank
+        }
+        const adjustedLines = pastedLines.map(line => {
+            // Remove min indent from each line
+            const adjustedLine = line.slice(minPastedIndentLength);
+            return adjustedLine;
+        });
+        const adjustedText = adjustedLines.join('\n');
+        yield editor.edit(editBuilder => {
+            for (const selection of editor.selections) {
+                editBuilder.delete(selection);
+            }
+        });
+        editor.insertSnippet(new vscode.SnippetString(adjustedText), editor.selection.start);
+    }));
+    context.subscriptions.push(formatOnPaste);
     const cacheClearInterval = setInterval(() => {
         definitionCache.clear();
         symbolToFileMap.clear();
@@ -166,8 +219,8 @@ function activate(context) {
             });
         }
     };
-    context.subscriptions.push(vscode.languages.registerDefinitionProvider({ language: 'luau' }, provider));
-    const insertFunctionEnd = vscode.commands.registerCommand('roblox.autoInsertFunctionEnd', () => __awaiter(this, void 0, void 0, function* () {
+    context.subscriptions.push(vscode.languages.registerDefinitionProvider({ language: "luau" }, provider));
+    const insertFunctionEnd = vscode.commands.registerCommand("roblox.autoInsertFunctionEnd", () => __awaiter(this, void 0, void 0, function* () {
         const editor = vscode.window.activeTextEditor;
         if (!editor)
             return;
@@ -212,7 +265,7 @@ function activate(context) {
             editor.selection = new vscode.Selection(newCursorPos, newCursorPos);
         }
     }));
-    const insertIfThenEnd = vscode.commands.registerCommand('roblox.autoInsertIfThenEnd', (hasThenAlready) => __awaiter(this, void 0, void 0, function* () {
+    const insertIfThenEnd = vscode.commands.registerCommand("roblox.autoInsertIfThenEnd", (hasThenAlready) => __awaiter(this, void 0, void 0, function* () {
         const editor = vscode.window.activeTextEditor;
         if (!editor)
             return;
@@ -243,7 +296,7 @@ function activate(context) {
         const newCursorPos = new vscode.Position(pos.line + 1, nextLine.text.length);
         editor.selection = new vscode.Selection(newCursorPos, newCursorPos);
     }));
-    const insertDo = vscode.commands.registerCommand('roblox.autoInsertDo', (hasDoAlready) => __awaiter(this, void 0, void 0, function* () {
+    const insertDo = vscode.commands.registerCommand("roblox.autoInsertDo", (hasDoAlready) => __awaiter(this, void 0, void 0, function* () {
         const editor = vscode.window.activeTextEditor;
         if (!editor)
             return;
@@ -274,7 +327,7 @@ function activate(context) {
         const newCursorPos = new vscode.Position(pos.line + 1, nextLine.text.length);
         editor.selection = new vscode.Selection(newCursorPos, newCursorPos);
     }));
-    const insertUntil = vscode.commands.registerCommand('roblox.autoInsertUntil', () => __awaiter(this, void 0, void 0, function* () {
+    const insertUntil = vscode.commands.registerCommand("roblox.autoInsertUntil", () => __awaiter(this, void 0, void 0, function* () {
         const editor = vscode.window.activeTextEditor;
         if (!editor)
             return;
@@ -331,7 +384,7 @@ function activate(context) {
             if (matchesFunction) {
                 if (areScopesFullyClosed(editor.document))
                     return;
-                vscode.commands.executeCommand('roblox.autoInsertFunctionEnd');
+                vscode.commands.executeCommand("roblox.autoInsertFunctionEnd");
                 return;
             }
             const matchesFor = FOR_REGEX.test(beforeCursor);
@@ -343,17 +396,17 @@ function activate(context) {
             if (matchesFor || matchesWhile) {
                 if (areScopesFullyClosed(editor.document))
                     return;
-                vscode.commands.executeCommand('roblox.autoInsertDo', matchesDo);
+                vscode.commands.executeCommand("roblox.autoInsertDo", matchesDo);
             }
             else if (matchesIf) {
                 if (areScopesFullyClosed(editor.document))
                     return;
-                vscode.commands.executeCommand('roblox.autoInsertIfThenEnd', matchesThen);
+                vscode.commands.executeCommand("roblox.autoInsertIfThenEnd", matchesThen);
             }
             else if (matchesRepeat) {
                 if (areScopesFullyClosed(editor.document))
                     return;
-                vscode.commands.executeCommand('roblox.autoInsertUntil');
+                vscode.commands.executeCommand("roblox.autoInsertUntil");
             }
         }
     });

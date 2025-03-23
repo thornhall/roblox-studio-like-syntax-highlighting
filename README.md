@@ -1,8 +1,16 @@
 # Roblox IDE
 
-Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syntax highlighting in VSCode. Now it comes with auto-insertion, Go To Definition, and Go To Type functionality!
+Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syntax highlighting in VSCode. Now it comes with auto-insertion, Go To Class Method Definition, Go To Type, and Smart Indent On Paste functionality!
 
 [Luau Language Server](https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp) is required for the best experience.
+
+# [New 03-23-2025] Smart Indent On Paste
+
+## Current behvaior WITHOUT smart indent enabled
+![PasteWithout](images/pastewithout.gif)
+
+## Current behvaior WITH smart indent enabled
+![PasteWith](images/pastewith.gif)
 
 # [New 03-21-2025] [Basic Support] Use control + click or command + click to Go To Function definition
 ![GoToFunction Preview](images/gotofunctiondefinition.gif)

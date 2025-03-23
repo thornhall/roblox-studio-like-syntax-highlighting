@@ -1,8 +1,8 @@
 {
     "name": "roblox-studio-like-syntax-highlighting",
     "displayName": "Roblox IDE",
-    "description": "Syntax highlighting for VSCode inspired by Roblox Studio syntax highlighting. Requires Luau-lsp to work. Now comes with auto-insertion, Go To Definition, and Go To Type functionality like Roblox Studio!",
-    "version": "1.3.3",
+    "description": "Syntax highlighting for VSCode inspired by Roblox Studio syntax highlighting. Requires Luau-LSP to work. Now comes with auto-insertion, Go To Class Method Definition, and Go To Type functionality!",
+    "version": "1.4.3",
     "publisher": "ThornHall",
     "icon": "studio.png",
     "engines": {
@@ -23,10 +23,10 @@
     "keywords": [
         "roblox",
         "luau",
+        "utility",
         "lua",
         "syntax highlighting",
         "roblox studio",
-        "theme",
         "dark theme",
         "code highlighting",
         "color theme",
@@ -62,8 +62,30 @@
             {
                 "command": "roblox.autoInsertUntil",
                 "title": "Auto insert until after repeat keyword"
+            },
+            {
+                "command": "smartPasteIndent.paste",
+                "title": "Smart Paste Indent (Luau/Lua)"
             }
         ],
+        "keybindings": [
+            {
+                "key": "Ctrl+V",
+                "command": "smartPasteIndent.paste",
+                "when": "editorTextFocus && (editorLangId == luau || editorLangId == lua)",
+                "mac": "Cmd+V"
+            }
+        ],
+        "configuration": {
+            "title": "Smart Paste Indentation",
+            "properties": {
+                "robloxIDE.smartPasteIndent.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Enable Smart Paste Indentation to align pasted code with current line."
+                }
+            }
+        },
         "configurationDefaults": {
             "editor.bracketPairColorization.enabled": true,
             "[lua]": {
