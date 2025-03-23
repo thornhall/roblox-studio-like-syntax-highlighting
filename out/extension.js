@@ -51,6 +51,8 @@ const IF_REGEX = /\bif\b/;
 const THEN_REGEX = /\bthen\b/;
 const FOR_REGEX = /\bfor\b/;
 const WHILE_REGEX = /\bwhile\b/;
+const REPEAT_REGEX = /\brepeat\b/;
+const UNTIL_REGEX = /\buntil\b/;
 function getIndentation(editor) {
     const insertSpaces = editor.options.insertSpaces === true;
     const tabSize = Number(editor.options.tabSize);
@@ -98,6 +100,10 @@ function areScopesFullyClosed(doc) {
             nesting++;
         if (IF_REGEX.test(lineText))
             nesting++;
+        if (REPEAT_REGEX.test(lineText))
+            nesting++;
+        if (UNTIL_REGEX.test(lineText))
+            nesting--;
         if (END_REGEX.test(lineText))
             nesting--;
     }
@@ -113,7 +119,7 @@ function findSymbolDefinitionInWorkspace(symbolName) {
         if (definitionCache.has(symbolName)) {
             return definitionCache.get(symbolName);
         }
-        const files = yield vscode.workspace.findFiles('**/*.{lua,luau}', '**/node_modules/**');
+        const files = yield vscode.workspace.findFiles("**/*.{lua,luau}", "**/node_modules/**");
         const regexPatterns = [
             new RegExp(`\\b(export\\s+)?type\\s+${symbolName}\\b`), // type declaration
             new RegExp(`function\\s+[A-Za-z_][A-Za-z0-9_]*\\:${symbolName}\\s*\\(`), // class method
@@ -156,7 +162,6 @@ function activate(context) {
                     return;
                 const symbolName = document.getText(wordRange);
                 const locations = yield findSymbolDefinitionInWorkspace(symbolName);
-                console.log("Locations:", locations);
                 return locations;
             });
         }
@@ -190,25 +195,13 @@ function activate(context) {
         yield editor.edit(edit => {
             const fullRange = new vscode.Range(currentLine.range.start, currentLine.range.end);
             let newText = `${beforeCursor}`;
+            newText = `${beforeCursor}${afterFunctionParentheses}\n${indent}${indentation}\n${indent}end${parenthesesToFill}`;
             edit.replace(fullRange, newText);
-        }, {
-            undoStopBefore: false,
-            undoStopAfter: false
-        });
-        yield editor.edit(edit => {
-            const fullRange = new vscode.Range(currentLine.range.start, currentLine.range.end);
-            let newText = `${beforeCursor}${afterFunctionParentheses}\n${indent}${indentation}\n${indent}end${parenthesesToFill}`;
-            edit.replace(fullRange, newText);
-        }, {
-            undoStopBefore: false,
-            undoStopAfter: false
-        });
-        const nextNextLine = doc.lineAt(pos.line + 3);
-        yield editor.edit(edit => {
+            const nextNextLine = doc.lineAt(pos.line + 1);
             edit.delete(nextNextLine.rangeIncludingLineBreak);
         }, {
-            undoStopBefore: false,
-            undoStopAfter: false
+            undoStopBefore: true,
+            undoStopAfter: true
         });
         if (afterFunctionParentheses) {
             const newCursorPos = new vscode.Position(pos.line, beforeCursor.length + 1); // +1 for '('
@@ -281,9 +274,38 @@ function activate(context) {
         const newCursorPos = new vscode.Position(pos.line + 1, nextLine.text.length);
         editor.selection = new vscode.Selection(newCursorPos, newCursorPos);
     }));
+    const insertUntil = vscode.commands.registerCommand('roblox.autoInsertUntil', () => __awaiter(this, void 0, void 0, function* () {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor)
+            return;
+        const doc = editor.document;
+        const pos = editor.selection.active;
+        const line = doc.lineAt(pos.line);
+        const lineText = line.text;
+        const beforeCursor = lineText.substring(0, pos.character);
+        const indentMatch = lineText.match(/^(\s*)/);
+        const indent = indentMatch ? indentMatch[1] : "";
+        const currentLine = doc.lineAt(pos.line);
+        let nextLine = doc.lineAt(pos.line + 1);
+        yield editor.edit(edit => {
+            const fullRange = new vscode.Range(currentLine.range.start, nextLine.range.end);
+            const indentNextLineMatch = nextLine.text.match(/^(\s*)/);
+            const indentNextLine = indentNextLineMatch ? indentNextLineMatch[1] : "";
+            const indentToAdd = getIndentation(editor);
+            let newText = `${beforeCursor}\n${indentNextLine}\n${indent}until`;
+            edit.replace(fullRange, newText);
+        }, {
+            undoStopBefore: false,
+            undoStopAfter: false
+        });
+        nextLine = doc.lineAt(pos.line + 1);
+        const newCursorPos = new vscode.Position(pos.line + 1, nextLine.text.length);
+        editor.selection = new vscode.Selection(newCursorPos, newCursorPos);
+    }));
     context.subscriptions.push(insertFunctionEnd);
     context.subscriptions.push(insertIfThenEnd);
     context.subscriptions.push(insertDo);
+    context.subscriptions.push(insertUntil);
     vscode.workspace.onDidChangeTextDocument(event => {
         const changes = event.contentChanges;
         if (changes.length === 0)
@@ -317,6 +339,7 @@ function activate(context) {
             const matchesWhile = WHILE_REGEX.test(beforeCursor);
             const matchesIf = IF_REGEX.test(beforeCursor);
             const matchesThen = THEN_REGEX.test(beforeCursor);
+            const matchesRepeat = REPEAT_REGEX.test(beforeCursor);
             if (matchesFor || matchesWhile) {
                 if (areScopesFullyClosed(editor.document))
                     return;
@@ -327,7 +350,13 @@ function activate(context) {
                     return;
                 vscode.commands.executeCommand('roblox.autoInsertIfThenEnd', matchesThen);
             }
+            else if (matchesRepeat) {
+                if (areScopesFullyClosed(editor.document))
+                    return;
+                vscode.commands.executeCommand('roblox.autoInsertUntil');
+            }
         }
     });
+    console.log("Roblox IDE activated");
 }
 //# sourceMappingURL=extension.js.map

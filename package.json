@@ -2,7 +2,7 @@
     "name": "roblox-studio-like-syntax-highlighting",
     "displayName": "Roblox IDE",
     "description": "Syntax highlighting for VSCode inspired by Roblox Studio syntax highlighting. Requires Luau-lsp to work. Now comes with auto-insertion, Go To Definition, and Go To Type functionality like Roblox Studio!",
-    "version": "1.2.3",
+    "version": "1.3.3",
     "publisher": "ThornHall",
     "icon": "studio.png",
     "engines": {
@@ -58,6 +58,10 @@
             {
                 "command": "roblox.autoInsertDo",
                 "title": "Auto insert do after while and for keywords"
+            },
+            {
+                "command": "roblox.autoInsertUntil",
+                "title": "Auto insert until after repeat keyword"
             }
         ],
         "configurationDefaults": {
