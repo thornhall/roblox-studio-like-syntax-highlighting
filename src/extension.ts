@@ -10,13 +10,12 @@ const WHILE_REGEX = /\bwhile\b/
 const REPEAT_REGEX = /\brepeat\b/
 const UNTIL_REGEX = /\buntil\b/
 const ELSEIF_REGEX = /\belseif\b/
+const ELSEIF_REGEX_SPACE = /\belse\s+if\b/
 const ELSE_REGEX = /\belse\b/
 
 function countTernaryExpressions(doc: vscode.TextDocument): number {
     const fullText = doc.getText();
-    // Note: currently overmatches on else if statements. However, because else if statements 
-    // contribute to the total nesting count, this balances out perfectly as we will now subtract them here. 
-    const matches = fullText.match(/(\=\s*if\b)|(\bthen\s*\n*\s*if\b)|(\belse\s*\n*\s*if\b)/g) || [];
+    const matches = fullText.match(/(\=\s*\n*\s*\bif\b)/g) || [];
     return matches.length
 }
 
@@ -77,6 +76,9 @@ function areScopesFullyClosed(doc: vscode.TextDocument): [number, boolean] {
         if (WHILE_REGEX.test(lineText)) nesting++
         if (FOR_REGEX.test(lineText)) nesting++
         if (IF_REGEX.test(lineText)) nesting++
+        if (ELSEIF_REGEX_SPACE.test(lineText)) {
+            nesting-- // account for "else if" matching with IF_REGEX but not requiring another end
+        }
         if (REPEAT_REGEX.test(lineText)) nesting++
         if (UNTIL_REGEX.test(lineText)) nesting--
         if (END_REGEX.test(lineText)) nesting--
