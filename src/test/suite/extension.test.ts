@@ -82,7 +82,7 @@ suite('Autocomplete Test Suite', function() {
             // Step 1: Simulate typing the Lua code snippet from the test case
             await typeAndPressEnter(editor, testCase.initial, testCase.regex);
 
-            await delay(200); // Need to wait for the extension to run the autocomplete
+            await delay(300); // Need to wait for the extension to run the autocomplete
     
             // Step 2: Assert that the final text matches the expected text (ignoring whitespace)
             const finalText = editor.document.getText();
