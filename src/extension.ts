@@ -13,6 +13,12 @@ const ELSEIF_REGEX = /\belseif\b/
 const ELSE_REGEX = /\belse\b/
 
 
+function countTernaryExpressions(doc: vscode.TextDocument): number {
+    const fullText = doc.getText();
+    const matches = fullText.match(/\=\s*if\b/gs)
+    return matches ? matches.length : 0;
+}
+
 function getIndentation(editor: vscode.TextEditor): string {
     const insertSpaces = editor.options.insertSpaces === true;
     const tabSize = Number(editor.options.tabSize);
@@ -45,6 +51,8 @@ function isMultilineCommentEnd(lineText: string): boolean {
 function areScopesFullyClosed(doc: vscode.TextDocument): boolean {
     let nesting = 0;
     let insideMultilineComment = false
+    
+    const numTernaries = countTernaryExpressions(doc)
 
     for (let i = 0; i < doc.lineCount; i++) {
         let lineText = doc.lineAt(i).text;
@@ -71,6 +79,7 @@ function areScopesFullyClosed(doc: vscode.TextDocument): boolean {
         if (UNTIL_REGEX.test(lineText)) nesting--
         if (END_REGEX.test(lineText)) nesting--
     }
+    nesting -= numTernaries // if statements in a ternary statement do not require a closing end 
     if (nesting === 0) {
         return true;
     }
@@ -131,7 +140,6 @@ export function activate(context: vscode.ExtensionContext) {
             await vscode.commands.executeCommand("editor.action.clipboardPasteAction");
             return;
         }
-
 
         const document = editor.document;
         const cursorPos = editor.selection.active;

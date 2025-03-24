@@ -1,14 +1,12 @@
 {
     "compilerOptions": {
         "module": "commonjs", // Required by VS Code extensions
-        "target": "es6", // Compiles to ES6 JS
+        "target": "ES2024", // Compiles to ES6 JS
         "outDir": "out", // Compiled JS files go here
         "rootDir": "src", // Source files are here
         "strict": true, // Enables strict type checking
         "sourceMap": true,
-        "lib": [
-            "es6"
-        ],
+        "lib": ["ES2024"],
         "esModuleInterop": true // For importing Node modules
     },
     "exclude": [
