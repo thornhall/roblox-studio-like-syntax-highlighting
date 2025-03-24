@@ -2,7 +2,7 @@
     "name": "roblox-studio-like-syntax-highlighting",
     "displayName": "Roblox IDE",
     "description": "Syntax highlighting for VSCode inspired by Roblox Studio syntax highlighting. Requires Luau-LSP to work. Now comes with auto-insertion, Go To Class Method Definition, and Go To Type functionality!",
-    "version": "1.4.6",
+    "version": "1.5.0",
     "publisher": "ThornHall",
     "icon": "studio.png",
     "engines": {
@@ -77,12 +77,17 @@
             }
         ],
         "configuration": {
-            "title": "Smart Paste Indentation",
+            "title": "Roblox IDE Config",
             "properties": {
                 "robloxIDE.smartPasteIndent.enabled": {
                     "type": "boolean",
                     "default": true,
                     "description": "Enable Smart Paste Indentation to align pasted code with current line."
+                },
+                "robloxIDE.showWarnings.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "Show VSCode warnings for possible user errors."
                 }
             }
         },
