@@ -48,8 +48,10 @@ const ELSEIF_REGEX = /\belseif\b/;
 const ELSE_REGEX = /\belse\b/;
 function countTernaryExpressions(doc) {
     const fullText = doc.getText();
-    const matches = fullText.match(/\=\s*if\b/gs);
-    return matches ? matches.length : 0;
+    // Note: currently overmatches on else if statements. However, because else if statements 
+    // contribute to the total nesting count, this balances out perfectly as we will now subtract them here. 
+    const matches = fullText.match(/(\=\s*if\b)|(\bthen\s*\n*\s*if\b)|(\belse\s*\n*\s*if\b)/g) || [];
+    return matches.length;
 }
 function getIndentation(editor) {
     const insertSpaces = editor.options.insertSpaces === true;
