@@ -1,5 +1,10 @@
+/*
+    Run with `npm test` in a terminal.
+*/
+
 import * as assert from 'assert';
 import * as vscode from 'vscode';
+import { TEST_CASES } from './testCases.test';  // Import testCases from the new file
 
 // Helper function to simulate typing and pressing Enter
 async function typeAndPressEnter(editor: vscode.TextEditor, text: string, regex: RegExp) {
@@ -47,72 +52,7 @@ async function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
 
-// Define the table of test cases
-interface TestCase {
-    initial: string;
-    expected: string;
-    regex: RegExp;
-}
-
-
 const RUN_SINGLE_TEST_CASE: number = -1;  // Set to the index of the test case you want to run, or -1 for all tests
-
-const testCases: TestCase[] = [
-
-// NOTE: Spaces and newlines matter in the `expected` strings
-
-//////////////////////
-// WHILE LOOP TESTS //
-//////////////////////
-    {
-        initial:
-`while`,
-        expected:
-`while do
-    
-end`,
-        regex: /while/
-    },
-
-////////////////////////
-// IF STATEMENT TESTS //
-////////////////////////
-    {
-        initial:
-`if true then
-    
-else`,
-        expected:
-`if true then
-    
-else 
-
-end`,
-        regex: /else/
-    },
-    {
-        initial:
-`if`,
-        expected:
-`if then
-    
-end`,
-        regex: /if/
-    },
-
-////////////////////
-// FUNCTION TESTS //
-////////////////////
-    {
-        initial:
-`function`,
-        expected:
-`function()
-    
-end`,
-        regex: /function/
-    },
-];
 
 suite('Autocomplete Test Suite', function() {
     this.timeout(5000);
@@ -129,7 +69,7 @@ suite('Autocomplete Test Suite', function() {
         vscode.window.showInformationMessage('Tests done!');
     });
 
-    const testCasesToRun = RUN_SINGLE_TEST_CASE === -1 ? testCases : [testCases[RUN_SINGLE_TEST_CASE]];    
+    const testCasesToRun = RUN_SINGLE_TEST_CASE === -1 ? TEST_CASES : [TEST_CASES[RUN_SINGLE_TEST_CASE]];    
     testCasesToRun.forEach((testCase, index) => {
         test(`Test Case ${(RUN_SINGLE_TEST_CASE === -1 ? index : RUN_SINGLE_TEST_CASE) + 1}`, async () => {
             // Clear the document before running the test
@@ -142,7 +82,7 @@ suite('Autocomplete Test Suite', function() {
             // Step 1: Simulate typing the Lua code snippet from the test case
             await typeAndPressEnter(editor, testCase.initial, testCase.regex);
 
-            await delay(100); // Need to wait for the extension to run the autocomplete
+            await delay(200); // Need to wait for the extension to run the autocomplete
     
             // Step 2: Assert that the final text matches the expected text (ignoring whitespace)
             const finalText = editor.document.getText();
