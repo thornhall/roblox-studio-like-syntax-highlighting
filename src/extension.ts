@@ -12,7 +12,7 @@ const UNTIL_REGEX = /\buntil\b/
 const ELSEIF_REGEX = /\belseif\b/
 const ELSEIF_REGEX_SPACE = /\belse\s+if\b/
 const ELSE_REGEX = /\belse\b/
-const CLASS_REGEX = /(\w+)\.new\s*\(?\)?$/
+const CLASS_REGEX = /\bfunction\b\s+(\w+)\.new\s*\(?\)?$/
 
 function countTernaryExpressions(doc: vscode.TextDocument): number {
     const fullText = doc.getText();
