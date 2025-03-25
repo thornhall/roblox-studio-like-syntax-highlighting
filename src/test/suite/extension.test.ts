@@ -4,8 +4,8 @@
 
 import * as assert from 'assert';
 import * as vscode from 'vscode';
-import { TEST_CASES } from './testCases.test';  // Import testCases from the new file
-import { LARGE_SCRIPT_SRC } from './largeScript.test';  // Import testCases from the new file
+import { TEST_CASES } from './testCases.test';
+import { LARGE_SCRIPT_SRC } from './largeScript.test';
 
 // Helper function to simulate typing and pressing Enter
 async function typeAndPressEnter(editor: vscode.TextEditor, text: string) {
