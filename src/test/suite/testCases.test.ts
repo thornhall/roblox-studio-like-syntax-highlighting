@@ -1,10 +1,14 @@
+/*
+    The test cases whose `initial` strings are auto
+    completed and compared with their `expected` strings.
+*/
+
 export interface TestCase {
     initial: string;
     expected: string;
-    regex: RegExp;
 }
 
-// NOTE: Spaces and newlines matter in the `expected` strings
+// Spaces and newlines matter in the `expected` strings
 
 export const TEST_CASES: TestCase[] = [
 
@@ -13,14 +17,49 @@ export const TEST_CASES: TestCase[] = [
 //////////////////////
     {
         initial:
-`while`,
+`while█`,
         expected:
 `while do
     
-end`,
-        regex: /while/
+end`
+    },
+    {
+        initial:
+`while true█`,
+        expected:
+`while true do
+    
+end`
     },
 
+////////////////////
+// FOR LOOP TESTS //
+////////////////////
+    {
+        initial:
+`for█`,
+        expected:
+`for do
+    
+end`
+    },
+    {
+        initial:
+`for _ in█`,
+        expected:
+`for _ in do
+    
+end`
+    },
+    {
+        initial:
+`for i, v█`,
+        expected:
+`for i, v do
+    
+end`
+    },
+ 
 ////////////////////////
 // IF STATEMENT TESTS //
 ////////////////////////
@@ -28,23 +67,35 @@ end`,
         initial:
 `if true then
     
-else`,
+else█`,
         expected:
 `if true then
     
 else 
-
-end`,
-        regex: /else/
+    
+end`, 
     },
     {
         initial:
-`if`,
+`if true then
+    
+elseif█
+
+end`,
+        expected:
+`if true then
+    
+elseif then
+    
+end`
+    },
+    {
+        initial:
+`if█`,
         expected:
 `if then
     
-end`,
-        regex: /if/
+end`
     },
 
 ////////////////////
@@ -52,11 +103,10 @@ end`,
 ////////////////////
     {
         initial:
-`function`,
+`function█`,
         expected:
 `function()
     
-end`,
-        regex: /function/
+end`
     },
 ];

@@ -5,9 +5,10 @@
 import * as assert from 'assert';
 import * as vscode from 'vscode';
 import { TEST_CASES } from './testCases.test';  // Import testCases from the new file
+import { LARGE_SCRIPT_SRC } from './largeScript.test';  // Import testCases from the new file
 
 // Helper function to simulate typing and pressing Enter
-async function typeAndPressEnter(editor: vscode.TextEditor, text: string, regex: RegExp) {
+async function typeAndPressEnter(editor: vscode.TextEditor, text: string) {
     const document = editor.document;
     const fullRange = new vscode.Range(
         document.positionAt(0),
@@ -19,29 +20,40 @@ async function typeAndPressEnter(editor: vscode.TextEditor, text: string, regex:
         editBuilder.replace(fullRange, text.trim());
     });
 
-    // Put cursor at beginning of line so it doesn't work even if our regex is wrong
-    editor.selection = new vscode.Selection(0, 0, 0, 0);
+    // Find the position of the block character (█)
+    const blockIndex = text.indexOf('█');
+    if (blockIndex === -1) {
+        throw new Error("No block character (█) found in the text.");
+    }
 
-    // Find the line that matches the regex
-    let targetLine: vscode.TextLine | undefined;
+    // Convert block index to line and character position
+    let charCount = 0;
+    let blockPosition: vscode.Position | null = null;
     for (let line = 0; line < document.lineCount; line++) {
-        const currentLine = document.lineAt(line);
-        if (regex.test(currentLine.text)) {
-            targetLine = currentLine;
+        const lineText = document.lineAt(line).text;
+        if (charCount + lineText.length >= blockIndex) {
+            blockPosition = new vscode.Position(line, blockIndex - charCount);
             break;
         }
+        charCount += lineText.length + 1; // +1 accounts for the newline character
     }
 
-    // If a matching line is found, move the cursor to the end of that line
-    if (targetLine) {
-        const endOfLine = targetLine.range.end;
-        editor.selection = new vscode.Selection(endOfLine, endOfLine);
-    } else {
-        // Throw an error if no matching line is found
-        throw new Error("regex match failed:\n" + text + '\n' + regex);
+    if (!blockPosition) {
+        throw new Error("Failed to determine block character position.");
     }
 
-    // await delay(1000); // Wait a second to view the changes
+    // Set cursor at the found position
+    editor.selection = new vscode.Selection(blockPosition, blockPosition);
+
+    // Delete the block character
+    await editor.edit((editBuilder) => {
+        const blockRange = new vscode.Range(blockPosition, blockPosition.translate(0, 1));
+        editBuilder.delete(blockRange);
+    });
+
+    if (SEE_TEST_DELAY_MS > 0) {
+        await delay(SEE_TEST_DELAY_MS); // Wait a bit to view the changes
+    }
 
     // Simulate pressing Enter
     await vscode.commands.executeCommand('type', { text: '\n' });
@@ -53,6 +65,8 @@ async function delay(ms: number) {
 }
 
 const RUN_SINGLE_TEST_CASE: number = -1;  // Set to the index of the test case you want to run, or -1 for all tests
+const APPEND_LARGE_SCRIPT_SRC = false // Use this once all of your test cases work as standalones
+const SEE_TEST_DELAY_MS = 1000 // The time to wait after inserting the `initial` string and before pressing enter. Set to -1 if not using.
 
 suite('Autocomplete Test Suite', function() {
     this.timeout(5000);
@@ -71,7 +85,7 @@ suite('Autocomplete Test Suite', function() {
 
     const testCasesToRun = RUN_SINGLE_TEST_CASE === -1 ? TEST_CASES : [TEST_CASES[RUN_SINGLE_TEST_CASE]];    
     testCasesToRun.forEach((testCase, index) => {
-        test(`Test Case ${(RUN_SINGLE_TEST_CASE === -1 ? index : RUN_SINGLE_TEST_CASE) + 1}`, async () => {
+        test(`Test Case ${RUN_SINGLE_TEST_CASE === -1 ? index + 1: RUN_SINGLE_TEST_CASE}`, async () => {
             // Clear the document before running the test
             await editor.edit((editBuilder) => {
                 const start = editor.document.lineAt(0).range.start;
@@ -80,7 +94,7 @@ suite('Autocomplete Test Suite', function() {
             });
 
             // Step 1: Simulate typing the Lua code snippet from the test case
-            await typeAndPressEnter(editor, testCase.initial, testCase.regex);
+            await typeAndPressEnter(editor, testCase.initial + '\n' + (APPEND_LARGE_SCRIPT_SRC ? LARGE_SCRIPT_SRC : ""));
 
             await delay(300); // Need to wait for the extension to run the autocomplete
     
@@ -88,7 +102,7 @@ suite('Autocomplete Test Suite', function() {
             const finalText = editor.document.getText();
             assert.strictEqual(
                 finalText.replace(/[\r]+/g, '').trim(),
-                testCase.expected.replace(/[\r]+/g, '').trim()
+                (testCase.expected + '\n' + (APPEND_LARGE_SCRIPT_SRC ? LARGE_SCRIPT_SRC : "")).replace(/[\r]+/g, '').trim()
             );
         });
     });
