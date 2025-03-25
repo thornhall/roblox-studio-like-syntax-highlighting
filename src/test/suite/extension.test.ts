@@ -7,6 +7,10 @@ import * as vscode from 'vscode';
 import { TEST_CASES } from './testCases.test';
 import { LARGE_SCRIPT_SRC } from './largeScript.test';
 
+const RUN_SINGLE_TEST_CASE: number = -1;  // Set to the index of the test case you want to run, or -1 for all tests
+const APPEND_LARGE_SCRIPT = false // Use this once all of your test cases work as standalones
+const TEST_DELAY_MS = 1000 // The time to wait after inserting the `initial` string and before pressing enter. Set to -1 if not using.
+
 // Helper function to simulate typing and pressing Enter
 async function typeAndPressEnter(editor: vscode.TextEditor, initialText: string) {
     const document = editor.document;
@@ -63,10 +67,6 @@ async function typeAndPressEnter(editor: vscode.TextEditor, initialText: string)
 async function delay(ms: number) {
     return new Promise(resolve => setTimeout(resolve, ms));
 }
-
-const RUN_SINGLE_TEST_CASE: number = -1;  // Set to the index of the test case you want to run, or -1 for all tests
-const APPEND_LARGE_SCRIPT = false // Use this once all of your test cases work as standalones
-const TEST_DELAY_MS = 1000 // The time to wait after inserting the `initial` string and before pressing enter. Set to -1 if not using.
 
 suite('Autocomplete Test Suite', function() {
     this.timeout(5000);
