@@ -47,6 +47,7 @@ const UNTIL_REGEX = /\buntil\b/;
 const ELSEIF_REGEX = /\belseif\b/;
 const ELSEIF_REGEX_SPACE = /\belse\s+if\b/;
 const ELSE_REGEX = /\belse\b/;
+const CLASS_REGEX = /(\w+)\.new\s*\(?\)?$/;
 function countTernaryExpressions(doc) {
     const fullText = doc.getText();
     const matches = fullText.match(/(\=\s*\n*\s*\bif\b)/g) || [];
@@ -323,6 +324,34 @@ function createAutoInsertIfThenCommand() {
     });
     return insertIfThenEnd;
 }
+function createClassAutoComplete() {
+    const autoCompleteClass = vscode.commands.registerCommand("roblox.autoCompleteClass", async (classCapture) => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor)
+            return;
+        const doc = editor.document;
+        const pos = editor.selection.active;
+        const line = doc.lineAt(pos.line);
+        let nextLine = doc.lineAt(pos.line + 1);
+        await editor.edit(edit => {
+            const name = classCapture?.[1];
+            if (name) {
+                const fullRange = new vscode.Range(line.range.start, nextLine.range.end);
+                const newText = `${name}.__index = ${name}
+function ${name}.new()
+  local self = setmetatable({}, ${name})
+  return self
+end
+return ${name}`;
+                edit.replace(fullRange, newText);
+            }
+        }, {
+            undoStopBefore: false,
+            undoStopAfter: false
+        });
+    });
+    return autoCompleteClass;
+}
 function createAutoInsertDoCommand() {
     const insertDo = vscode.commands.registerCommand("roblox.autoInsertDo", async (hasDoAlready) => {
         const editor = vscode.window.activeTextEditor;
@@ -394,6 +423,7 @@ function activate(context) {
     const insertDo = createAutoInsertDoCommand();
     const insertUntil = createAutoInsertUntilCommand();
     const formatOnPaste = createFormatOnPasteCommand();
+    const classAutoComplete = createClassAutoComplete();
     // Cache clearing every 10 minutes (600,000 ms)
     const cacheClearInterval = setInterval(() => {
         definitionCache.clear();
@@ -407,6 +437,7 @@ function activate(context) {
     context.subscriptions.push(insertDo);
     context.subscriptions.push(insertUntil);
     context.subscriptions.push(formatOnPaste);
+    context.subscriptions.push(classAutoComplete);
     vscode.workspace.onDidChangeTextDocument(async (event) => {
         const changes = event.contentChanges;
         if (changes.length === 0)
@@ -439,7 +470,13 @@ function activate(context) {
             const matchesRepeat = REPEAT_REGEX.test(beforeCursor);
             const matchesElseIf = ELSEIF_REGEX.test(beforeCursor);
             const matchesElse = ELSE_REGEX.test(beforeCursor);
-            if (matchesFunction) {
+            const matchesClass = beforeCursor.match(CLASS_REGEX);
+            if (matchesClass && matchesClass[1]) {
+                if (validateScopeClosureBeforeEdit(event.document))
+                    return;
+                vscode.commands.executeCommand("roblox.autoCompleteClass", matchesClass);
+            }
+            else if (matchesFunction) {
                 if (validateScopeClosureBeforeEdit(event.document))
                     return;
                 vscode.commands.executeCommand("roblox.autoInsertFunctionEnd");
