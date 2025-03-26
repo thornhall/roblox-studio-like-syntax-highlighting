@@ -471,6 +471,9 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(formatOnPaste)
     context.subscriptions.push(classAutoComplete)
 
+    const config = vscode.workspace.getConfiguration();
+    const isAutoInsertClassEnabled = config.get<boolean>("robloxIDE.autoInsertModuleBoilerplate.enabled", true);
+
     vscode.workspace.onDidChangeTextDocument(async (event) => {
         const changes = event.contentChanges;
         if (changes.length === 0) return;
@@ -508,7 +511,7 @@ export function activate(context: vscode.ExtensionContext) {
             const matchesElse = ELSE_REGEX.test(beforeCursor)
             const matchesClass = beforeCursor.match(CLASS_REGEX)
 
-            if (matchesClass && matchesClass[1]) {
+            if (isAutoInsertClassEnabled && matchesClass && matchesClass[1]) {
                 if (validateScopeClosureBeforeEdit(event.document)) return
                 vscode.commands.executeCommand("roblox.autoCompleteClass", matchesClass);
             } else if (matchesFunction) {

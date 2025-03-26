@@ -447,6 +447,8 @@ function activate(context) {
     context.subscriptions.push(insertUntil);
     context.subscriptions.push(formatOnPaste);
     context.subscriptions.push(classAutoComplete);
+    const config = vscode.workspace.getConfiguration();
+    const isAutoInsertClassEnabled = config.get("robloxIDE.autoInsertModuleBoilerplate.enabled", true);
     vscode.workspace.onDidChangeTextDocument(async (event) => {
         const changes = event.contentChanges;
         if (changes.length === 0)
@@ -480,7 +482,7 @@ function activate(context) {
             const matchesElseIf = ELSEIF_REGEX_ALL.test(beforeCursor);
             const matchesElse = ELSE_REGEX.test(beforeCursor);
             const matchesClass = beforeCursor.match(CLASS_REGEX);
-            if (matchesClass && matchesClass[1]) {
+            if (isAutoInsertClassEnabled && matchesClass && matchesClass[1]) {
                 if (validateScopeClosureBeforeEdit(event.document))
                     return;
                 vscode.commands.executeCommand("roblox.autoCompleteClass", matchesClass);
