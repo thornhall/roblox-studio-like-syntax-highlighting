@@ -9,7 +9,7 @@ const FOR_REGEX = /\bfor\b/
 const WHILE_REGEX = /\bwhile\b/
 const REPEAT_REGEX = /\brepeat\b/
 const UNTIL_REGEX = /\buntil\b/
-const ELSEIF_REGEX = /\belseif\b/
+const ELSEIF_REGEX_ALL = /\belse\s*if\b/
 const ELSEIF_REGEX_SPACE = /\belse\s+if\b/
 const ELSE_REGEX = /\belse\b/
 const CLASS_REGEX = /\bfunction\b\s+(\w+)\.new\s*\(?\)?$/
@@ -25,7 +25,7 @@ function getIndentation(editor: vscode.TextEditor): string {
     const tabSize = Number(editor.options.tabSize);
 
     if (insertSpaces) {
-        return ' '.repeat(tabSize); 
+        return ' '.repeat(tabSize);
     } else {
         return '\t';
     }
@@ -53,7 +53,7 @@ function areScopesFullyClosed(doc: vscode.TextDocument): [number, boolean] {
     let nesting = 0;
     let insideMultilineComment = false
     let fullyClosed = false
-    
+
     const numTernaries = countTernaryExpressions(doc)
 
     for (let i = 0; i < doc.lineCount; i++) {
@@ -288,7 +288,8 @@ function createAutoInsertFunctionEndCommand(): vscode.Disposable {
 }
 
 function createAutoInsertIfThenCommand(): vscode.Disposable {
-    const insertIfThenEnd = vscode.commands.registerCommand("roblox.autoInsertIfThenEnd", async (hasThenAlready: boolean, isElse: boolean, isElseIf: boolean) => {
+    const insertIfThenEnd = vscode.commands.registerCommand("roblox.autoInsertIfThenEnd", async (hasThenAlready: boolean, isElse: boolean, isElseIf: boolean, areAllScopesClosed: boolean) => {
+        if (areAllScopesClosed && hasThenAlready) return
         const editor = vscode.window.activeTextEditor;
         if (!editor) return;
 
@@ -305,7 +306,7 @@ function createAutoInsertIfThenCommand(): vscode.Disposable {
 
         await editor.edit(edit => {
             const fullRange = new vscode.Range(currentLine.range.start, nextLine.range.end);
-            const then = hasThenAlready || (isElse && !isElseIf)? "" : "then";
+            const then = hasThenAlready || (isElse && !isElseIf) ? "" : "then";
 
             const indentNextLineMatch = nextLine.text.match(/^(\s*)/);
             const indentNextLine = indentNextLineMatch ? indentNextLineMatch[1] : ""
@@ -313,6 +314,11 @@ function createAutoInsertIfThenCommand(): vscode.Disposable {
 
             let newText = `${beforeCursor} ${then}\n${indentNextLine}\n${indent}end`;
             if (!hasThenAlready && !isElse) newText = `${beforeCursor} ${then}\n${indentNextLine}${indentToAdd}\n${indent}end`;
+
+            if (isElseIf && areAllScopesClosed) {
+                // edge case: we need to fill in the "then" for "elseif" but "end" is already there
+                newText = `${beforeCursor} ${then}\n${indentToAdd}`
+            }
 
             edit.replace(fullRange, newText);
         }, {
@@ -342,14 +348,17 @@ function createClassAutoComplete(): vscode.Disposable {
             if (name) {
                 const fullRange = new vscode.Range(line.range.start, nextLine.range.end);
 
-                const newText = `${name}.__index = ${name}
+                const newText = `local ${name} = {}
+${name}.__index = ${name}
+
 function ${name}.new()
   local self = setmetatable({}, ${name})
   return self
 end
+
 return ${name}`
                 edit.replace(fullRange, newText);
-            } 
+            }
         }, {
             undoStopBefore: false,
             undoStopAfter: false
@@ -453,7 +462,7 @@ export function activate(context: vscode.ExtensionContext) {
         console.log("Roblox IDE: Cleared symbol definition cache.");
     }, 30 * 60 * 1000); // 30 min
 
-    context.subscriptions.push({dispose: () => clearInterval(cacheClearInterval)});
+    context.subscriptions.push({ dispose: () => clearInterval(cacheClearInterval) });
     context.subscriptions.push(vscode.languages.registerDefinitionProvider({ language: "luau" }, definitionProvider));
     context.subscriptions.push(insertFunctionEnd);
     context.subscriptions.push(insertIfThenEnd);
@@ -461,11 +470,11 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(insertUntil);
     context.subscriptions.push(formatOnPaste)
     context.subscriptions.push(classAutoComplete)
-    
+
     vscode.workspace.onDidChangeTextDocument(async (event) => {
         const changes = event.contentChanges;
         if (changes.length === 0) return;
-        
+
         const editor = vscode.window.activeTextEditor;
         if (!editor || editor.document !== event.document) return;
 
@@ -495,9 +504,10 @@ export function activate(context: vscode.ExtensionContext) {
             const matchesIf = IF_REGEX.test(beforeCursor)
             const matchesThen = THEN_REGEX.test(beforeCursor)
             const matchesRepeat = REPEAT_REGEX.test(beforeCursor)
-            const matchesElseIf = ELSEIF_REGEX.test(beforeCursor)
+            const matchesElseIf = ELSEIF_REGEX_ALL.test(beforeCursor)
             const matchesElse = ELSE_REGEX.test(beforeCursor)
             const matchesClass = beforeCursor.match(CLASS_REGEX)
+
             if (matchesClass && matchesClass[1]) {
                 if (validateScopeClosureBeforeEdit(event.document)) return
                 vscode.commands.executeCommand("roblox.autoCompleteClass", matchesClass);
@@ -508,8 +518,10 @@ export function activate(context: vscode.ExtensionContext) {
                 if (validateScopeClosureBeforeEdit(event.document)) return
                 vscode.commands.executeCommand("roblox.autoInsertDo", matchesDo);
             } else if (matchesIf || matchesElseIf || matchesElse) {
-                if (validateScopeClosureBeforeEdit(event.document)) return
-                vscode.commands.executeCommand("roblox.autoInsertIfThenEnd", matchesThen, matchesElse, matchesElseIf);
+                // elseif is an edgecase: we want to auto insert "then" even if an "end" is already present 
+                const areScopesClosedForDoc = validateScopeClosureBeforeEdit(event.document)
+                if (areScopesClosedForDoc && !matchesElseIf) return
+                vscode.commands.executeCommand("roblox.autoInsertIfThenEnd", matchesThen, matchesElse, matchesElseIf, areScopesClosedForDoc);
             } else if (matchesRepeat) {
                 if (validateScopeClosureBeforeEdit(event.document)) return
                 vscode.commands.executeCommand("roblox.autoInsertUntil");

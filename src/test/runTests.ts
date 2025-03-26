@@ -8,7 +8,8 @@ async function main() {
 
         await runTests({
             extensionDevelopmentPath,
-            extensionTestsPath
+            extensionTestsPath,
+            reuseMachineInstall: true,
         });
     } catch (err) {
         console.error("Failed to run tests");

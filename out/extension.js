@@ -44,10 +44,10 @@ const FOR_REGEX = /\bfor\b/;
 const WHILE_REGEX = /\bwhile\b/;
 const REPEAT_REGEX = /\brepeat\b/;
 const UNTIL_REGEX = /\buntil\b/;
-const ELSEIF_REGEX = /\belseif\b/;
+const ELSEIF_REGEX_ALL = /\belse\s*if\b/;
 const ELSEIF_REGEX_SPACE = /\belse\s+if\b/;
 const ELSE_REGEX = /\belse\b/;
-const CLASS_REGEX = /(\w+)\.new\s*\(?\)?$/;
+const CLASS_REGEX = /\bfunction\b\s+(\w+)\.new\s*\(?\)?$/;
 function countTernaryExpressions(doc) {
     const fullText = doc.getText();
     const matches = fullText.match(/(\=\s*\n*\s*\bif\b)/g) || [];
@@ -291,7 +291,9 @@ function createAutoInsertFunctionEndCommand() {
     return insertFunctionEnd;
 }
 function createAutoInsertIfThenCommand() {
-    const insertIfThenEnd = vscode.commands.registerCommand("roblox.autoInsertIfThenEnd", async (hasThenAlready, isElse, isElseIf) => {
+    const insertIfThenEnd = vscode.commands.registerCommand("roblox.autoInsertIfThenEnd", async (hasThenAlready, isElse, isElseIf, areAllScopesClosed) => {
+        if (areAllScopesClosed && hasThenAlready)
+            return;
         const editor = vscode.window.activeTextEditor;
         if (!editor)
             return;
@@ -313,6 +315,10 @@ function createAutoInsertIfThenCommand() {
             let newText = `${beforeCursor} ${then}\n${indentNextLine}\n${indent}end`;
             if (!hasThenAlready && !isElse)
                 newText = `${beforeCursor} ${then}\n${indentNextLine}${indentToAdd}\n${indent}end`;
+            if (isElseIf && areAllScopesClosed) {
+                // edge case: we need to fill in the "then" for "elseif" but "end" is already there
+                newText = `${beforeCursor} ${then}\n${indentToAdd}`;
+            }
             edit.replace(fullRange, newText);
         }, {
             undoStopBefore: false,
@@ -337,11 +343,14 @@ function createClassAutoComplete() {
             const name = classCapture?.[1];
             if (name) {
                 const fullRange = new vscode.Range(line.range.start, nextLine.range.end);
-                const newText = `${name}.__index = ${name}
+                const newText = `local ${name} = {}
+${name}.__index = ${name}
+
 function ${name}.new()
   local self = setmetatable({}, ${name})
   return self
 end
+
 return ${name}`;
                 edit.replace(fullRange, newText);
             }
@@ -468,7 +477,7 @@ function activate(context) {
             const matchesIf = IF_REGEX.test(beforeCursor);
             const matchesThen = THEN_REGEX.test(beforeCursor);
             const matchesRepeat = REPEAT_REGEX.test(beforeCursor);
-            const matchesElseIf = ELSEIF_REGEX.test(beforeCursor);
+            const matchesElseIf = ELSEIF_REGEX_ALL.test(beforeCursor);
             const matchesElse = ELSE_REGEX.test(beforeCursor);
             const matchesClass = beforeCursor.match(CLASS_REGEX);
             if (matchesClass && matchesClass[1]) {
@@ -487,9 +496,11 @@ function activate(context) {
                 vscode.commands.executeCommand("roblox.autoInsertDo", matchesDo);
             }
             else if (matchesIf || matchesElseIf || matchesElse) {
-                if (validateScopeClosureBeforeEdit(event.document))
+                // elseif is an edgecase: we want to auto insert "then" even if an "end" is already present 
+                const areScopesClosedForDoc = validateScopeClosureBeforeEdit(event.document);
+                if (areScopesClosedForDoc && !matchesElseIf)
                     return;
-                vscode.commands.executeCommand("roblox.autoInsertIfThenEnd", matchesThen, matchesElse, matchesElseIf);
+                vscode.commands.executeCommand("roblox.autoInsertIfThenEnd", matchesThen, matchesElse, matchesElseIf, areScopesClosedForDoc);
             }
             else if (matchesRepeat) {
                 if (validateScopeClosureBeforeEdit(event.document))

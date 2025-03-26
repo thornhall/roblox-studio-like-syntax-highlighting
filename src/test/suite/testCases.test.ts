@@ -12,78 +12,77 @@ export interface TestCase {
 
 export const TEST_CASES: TestCase[] = [
 
-//////////////////////
-// WHILE LOOP TESTS //
-//////////////////////
+    //////////////////////
+    // WHILE LOOP TESTS //
+    //////////////////////
     {
         initial:
-`while█`,
+            `while█`,
         expected:
-`while do
+            `while do
     
 end`
     },
     {
         initial:
-`while true█`,
+            `while true█`,
         expected:
-`while true do
+            `while true do
     
 end`
     },
 
-////////////////////
-// FOR LOOP TESTS //
-////////////////////
+    ////////////////////
+    // FOR LOOP TESTS //
+    ////////////////////
     {
         initial:
-`for█`,
+            `for█`,
         expected:
-`for do
+            `for do
     
 end`
     },
     {
         initial:
-`for _ in█`,
+            `for _ in█`,
         expected:
-`for _ in do
+            `for _ in do
     
 end`
     },
     {
         initial:
-`for i, v█`,
+            `for i, v█`,
         expected:
-`for i, v do
+            `for i, v do
     
 end`
     },
- 
-////////////////////////
-// IF STATEMENT TESTS //
-////////////////////////
+
+    ////////////////////////
+    // IF STATEMENT TESTS //
+    ////////////////////////
     {
         initial:
-`if true then
+            `if true then
     
 else█`,
         expected:
-`if true then
+            `if true then
     
 else 
     
-end`, 
+end`,
     },
     {
         initial:
-`if true then
+            `if true then
     
 elseif█
-
 end`,
         expected:
-`if true then
+            `if true then
     
 elseif then
     
@@ -91,21 +90,21 @@ end`
     },
     {
         initial:
-`if█`,
+            `if█`,
         expected:
-`if then
+            `if then
     
 end`
     },
 
-////////////////////
-// FUNCTION TESTS //
-////////////////////
+    ////////////////////
+    // FUNCTION TESTS //
+    ////////////////////
     {
         initial:
-`function█`,
+            `function█`,
         expected:
-`function()
+            `function()
     
 end`
     },

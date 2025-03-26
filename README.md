@@ -4,6 +4,9 @@ Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syn
 
 [Luau Language Server](https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp) is required for the best experience.
 
+# [New 03-26-2025] Auto-insert ModuleScript boilerplate
+![ModuleAutoInsert](images/moduleautocomplete.gif.gif)
+
 # [New 03-23-2025] Smart Indent On Paste
 
 Ever tried to paste some code you copied and the indentation gets all messed up when you paste it? Smart Indent On Paste aims to solve this problem. 
