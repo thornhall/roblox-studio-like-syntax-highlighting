@@ -5,7 +5,7 @@ Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syn
 [Luau Language Server](https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp) is required for the best experience.
 
 # [New 03-26-2025] Auto-insert ModuleScript boilerplate
-![ModuleAutoInsert](images/moduleautocomplete.gif.gif)
+![ModuleAutoInsert](images/moduleautocomplete.gif)
 
 # [New 03-23-2025] Smart Indent On Paste
 
