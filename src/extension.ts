@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import * as path from "path";
+import * as fs from "fs";
 
 const FUNCTION_REGEX = /\bfunction\b/
 const END_REGEX = /\bend\b/
@@ -445,6 +447,227 @@ function createAutoInsertUntilCommand(): vscode.Disposable {
     return insertUntil
 }
 
+// Returns true if one of the ancestor directories is a Roblox directory
+function validateParentDirectory(fsPath: string): [boolean, string?] {
+    let currentDir = fsPath;
+
+    const validDirNames = [
+        "ServerStorage",
+        "ReplicatedStorage",
+        "StarterPlayer",
+        "Workspace",
+        "StarterGui",
+        "StarterPlayer",
+        "ServerScriptService"
+    ]
+    // Loop through parent directories until the root
+    while (currentDir !== path.parse(currentDir).root) {
+        const parentDirName = path.basename(currentDir);
+
+        console.log(parentDirName)
+        if (validDirNames.includes(parentDirName)) {
+            return [true, parentDirName]
+        }
+        // Move up one directory
+        currentDir = path.dirname(currentDir);
+    }
+    const message = "Location is not parented by a valid Roblox directory"
+    vscode.window.showErrorMessage(`Unable to create ModuleScript: ${message}`);
+    return [false, undefined];
+}
+
+// When user creates a new file via clicking a directory, we don't have a reference file to duplicate.
+// So we must create a new one, but what extension do we give it? This function returns the appropriate extension
+// Depending on the roblox service the folder is contained within
+function getFileExtensionForNewFile(fsPath: string): string | undefined {
+    const serverLua = [
+        ".server.lua",
+        "ServerStorage",
+        "ServerScriptService"
+    ]
+
+    const clientLua = [
+        ".client.lua",
+        "StarterPlayer",
+        "StarterGui",
+        "StarterPlayer",
+    ]
+
+    const normalLua = [
+        ".lua",
+        "ReplicatedStorage",
+        "Workspace"
+    ]
+
+    const dirTypes = [serverLua, clientLua, normalLua]
+
+    const [_, parentDirMatch] = validateParentDirectory(fsPath)
+    if (!parentDirMatch) return undefined
+
+    for (const dirType of dirTypes) {
+        for (const parentDir of dirType) {
+            if (parentDirMatch === parentDir) {
+                return dirType[0]
+            }
+        }
+    }
+    return undefined
+}
+
+
+function isDirectory(fsPath: string) {
+    try {
+        const stats = fs.statSync(fsPath);
+        return stats.isDirectory()
+    } catch (err) {
+        console.error('Error checking file path:', err);
+        throw new Error(`Invalid path: ${fsPath}`);
+    }
+}
+
+function getDirectoryPath(fsPath: string): string {
+    try {
+        const stats = fs.statSync(fsPath);
+
+        if (stats.isDirectory()) {
+            // If it's a directory, return as is
+            return fsPath;
+        } else {
+            // If it's not a directory, get the parent directory
+            return path.dirname(fsPath);
+        }
+    } catch (err) {
+        console.error('Error checking file path:', err);
+        throw new Error(`Invalid path: ${fsPath}`);
+    }
+}
+
+// Function to get the correct extension
+function getCustomExtension(filePath: string): string {
+    if (filePath.endsWith(".client.lua")) {
+        return ".client.lua";
+    }
+    if (filePath.endsWith(".server.lua")) {
+        return ".server.lua";
+    }
+    return ".lua"; // Default to .lua if no custom extension
+}
+
+// Get the correct base name while keeping custom extensions
+function getModuleName(uri: vscode.Uri): string {
+    const filePath = uri.fsPath;
+    const customExtension = getCustomExtension(filePath);
+    // Remove the full extension (including .client.lua or .server.lua)
+    return path.basename(filePath, customExtension);
+}
+
+function createDuplicateScriptCommand(): vscode.Disposable {
+    const createDuplicateModuleScript = vscode.commands.registerCommand(
+        "roblox.duplicateRobloxScript",
+        async (uri: vscode.Uri) => {
+            if (!uri || !uri.fsPath) {
+                return;
+            }
+            const [valid, _] = validateParentDirectory(uri.fsPath)
+            if (!valid) {
+                return;
+            }
+
+            let dirPath = null;
+            let isDir = false;
+            try {
+                dirPath = getDirectoryPath(uri.fsPath);
+                isDir = isDirectory(uri.fsPath);
+            } catch (err) {
+                if (err instanceof Error) {
+                    vscode.window.showErrorMessage(`Unable to create ModuleScript: ${err.message}`);
+                } else {
+                    vscode.window.showErrorMessage("Unable to create ModuleScript: Unknown error occurred.");
+                }
+                return;
+            }
+
+            if (!dirPath) {
+                return;
+            }
+
+            let extensions = [
+                ".client.lua",
+                ".server.lua",
+                ".lua"
+            ];
+            let fileExtensionToUse = null;
+            for (let i = 0; i < extensions.length; i++) {
+                const ext = extensions[i];
+                if (uri.fsPath.includes(ext)) {
+                    fileExtensionToUse = ext;
+                    break;
+                }
+            }
+
+            if (!fileExtensionToUse && !isDir) {
+                vscode.window.showErrorMessage("Invalid file type chosen for duplication.");
+                return;
+            }
+
+            let moduleName = getModuleName(uri);
+            if (isDir) {
+                moduleName = "Script";
+                fileExtensionToUse = getFileExtensionForNewFile(uri.fsPath)
+                if (!fileExtensionToUse) return
+            }
+
+            let filePath = path.join(dirPath, `${moduleName}${fileExtensionToUse}`);
+
+            // Avoid overwriting existing files by adding "copy" suffix
+            for (let i = 0; i < 20; i++) {
+                filePath = path.join(dirPath, `${moduleName}${fileExtensionToUse}`);
+                if (!fs.existsSync(filePath)) {
+                    break;
+                }
+                moduleName = `${moduleName} copy${i}`;
+            }
+
+            if (fs.existsSync(filePath)) {
+                vscode.window.showErrorMessage("Unable to create ModuleScript: File already exists.");
+                return;
+            }
+
+            let fileContent = `local ModuleScript = {}\n\nreturn ModuleScript`; // Default content for new files
+            if (!isDir) {
+                try {
+                    fileContent = fs.readFileSync(uri.fsPath, 'utf8');
+                } catch (err) {
+                    if (err instanceof Error) {
+                        vscode.window.showErrorMessage(`Error reading original file: ${err.message}`);
+                    } else {
+                        vscode.window.showErrorMessage("Error reading original file: Unknown error occurred.");
+                    }
+                    return;
+                }
+            }
+
+            try {
+                fs.writeFileSync(filePath, fileContent);
+            } catch (err) {
+                if (err instanceof Error) {
+                    vscode.window.showErrorMessage(`Unable to create ModuleScript: ${err.message}`);
+                } else {
+                    vscode.window.showErrorMessage("Unable to create ModuleScript: Unknown error occurred.");
+                }
+                return;
+            }
+
+            const openPath = vscode.Uri.file(filePath);
+            vscode.workspace.openTextDocument(openPath).then((doc) => {
+                vscode.window.showTextDocument(doc);
+            });
+        }
+    );
+
+    return createDuplicateModuleScript;
+}
+
 export function activate(context: vscode.ExtensionContext) {
 
     const definitionProvider = createGoToDefinitionProvider()
@@ -454,13 +677,14 @@ export function activate(context: vscode.ExtensionContext) {
     const insertUntil = createAutoInsertUntilCommand()
     const formatOnPaste = createFormatOnPasteCommand()
     const classAutoComplete = createClassAutoComplete()
+    const insertScriptCommand = createDuplicateScriptCommand()
 
-    // Cache clearing every 10 minutes (600,000 ms)
+    // Cache clearing every 30 minutes
     const cacheClearInterval = setInterval(() => {
         definitionCache.clear();
         filePathToSymbols.clear();
         console.log("Roblox IDE: Cleared symbol definition cache.");
-    }, 30 * 60 * 1000); // 30 min
+    }, 30 * 60 * 1000);
 
     context.subscriptions.push({ dispose: () => clearInterval(cacheClearInterval) });
     context.subscriptions.push(vscode.languages.registerDefinitionProvider({ language: "luau" }, definitionProvider));
@@ -470,6 +694,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(insertUntil);
     context.subscriptions.push(formatOnPaste)
     context.subscriptions.push(classAutoComplete)
+    context.subscriptions.push(insertScriptCommand)
 
     const config = vscode.workspace.getConfiguration();
     const isAutoInsertClassEnabled = config.get<boolean>("robloxIDE.autoInsertModuleBoilerplate.enabled", true);

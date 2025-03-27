@@ -1,8 +1,15 @@
 # Roblox IDE
 
-Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syntax highlighting in VSCode. Now it comes with auto-insertion, Go To Class Method Definition, Go To Type, and Smart Indent On Paste functionality!
+Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syntax highlighting in VSCode. Now it comes with auto-insertion, Go To Class Method Definition, Go To Type, Right-Click To Duplicate Script, and Smart Indent On Paste functionality!
 
 [Luau Language Server](https://marketplace.visualstudio.com/items?itemName=JohnnyMorganz.luau-lsp) is required for the best experience.
+
+# [New 03-26-2025] Right-Click to Duplicate or Create Script
+
+Now, just like in Roblox Studio, you can right click an existing lua file to duplicate it. If you use this command on a directory,
+it will create a new lua file with an appropriate extension depending on the directory.
+
+![DuplicateScript](images/duplicatescript.gif)
 
 # [New 03-26-2025] Auto-insert ModuleScript boilerplate
 ![ModuleAutoInsert](images/moduleautocomplete.gif)
