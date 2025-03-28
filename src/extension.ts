@@ -520,7 +520,7 @@ function isDirectory(fsPath: string) {
         const stats = fs.statSync(fsPath);
         return stats.isDirectory()
     } catch (err) {
-        console.error('Error checking file path:', err);
+        console.error("Error checking file path:", err);
         throw new Error(`Invalid path: ${fsPath}`);
     }
 }
@@ -537,7 +537,7 @@ function getDirectoryPath(fsPath: string): string {
             return path.dirname(fsPath);
         }
     } catch (err) {
-        console.error('Error checking file path:', err);
+        console.error("Error checking file path:", err);
         throw new Error(`Invalid path: ${fsPath}`);
     }
 }
@@ -746,7 +746,6 @@ export function activate(context: vscode.ExtensionContext) {
                 if (validateScopeClosureBeforeEdit(event.document)) return
                 vscode.commands.executeCommand("roblox.autoInsertDo", matchesDo);
             } else if (matchesIf || matchesElseIf || matchesElse) {
-                // elseif is an edgecase: we want to auto insert "then" even if an "end" is already present 
                 const areScopesClosedForDoc = validateScopeClosureBeforeEdit(event.document)
                 if (areScopesClosedForDoc && !matchesElseIf) return
                 vscode.commands.executeCommand("roblox.autoInsertIfThenEnd", matchesThen, matchesElse, matchesElseIf, areScopesClosedForDoc);
