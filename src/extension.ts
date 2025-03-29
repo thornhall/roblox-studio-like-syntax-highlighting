@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
 import * as path from "path";
 import * as fs from "fs";
-import { GetServiceCompletionProvider } from './providers/getServiceCompletionProvider';
 
 const FUNCTION_REGEX = /\bfunction\b/
 const END_REGEX = /\bend\b/
@@ -687,15 +686,6 @@ export function activate(context: vscode.ExtensionContext) {
         console.log("Roblox IDE: Cleared symbol definition cache.");
     }, 30 * 60 * 1000);
 
-    // Register GetServiceCompletionProvider for Luau
-    const provider = vscode.languages.registerCompletionItemProvider(
-        { language: "luau" },
-        new GetServiceCompletionProvider(),
-        '"', // Trigger on double quote
-        "'"  // Trigger on single quote
-    );
-
-    context.subscriptions.push(provider);
     context.subscriptions.push({ dispose: () => clearInterval(cacheClearInterval) });
     context.subscriptions.push(vscode.languages.registerDefinitionProvider({ language: "luau" }, definitionProvider));
     context.subscriptions.push(insertFunctionEnd);

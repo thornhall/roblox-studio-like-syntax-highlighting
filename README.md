@@ -17,13 +17,6 @@ Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syn
 
 - **Duplicate Or Create Script:** Now, just like Roblox Studio, you can right click a script to duplicate it. When used on a valid directory, it will create a lua script with an appropriate extension depending on the directory
 
-- **Auto Complete for Game Services:** When typing `game:GetService("...")` you will be given autocomplete suggestions. Other extensions claim to provide this functionality but I couldn't get it working, so I implemented it myself!
-
-# [New 03-29-2025] Auto-Complete for game:GetService
-After being frustrated that this wasn't working for other extensions, I implemented it myself. Now you will get autocomplete suggestions for game services!
-
-![AutoCompleteService](images/autocompleteservices.gif)
-
 # [New 03-27-2025] Right-Click to Duplicate or Create Script
 
 Now, just like in Roblox Studio, you can right click an existing lua file to duplicate it. If you use this command on a directory,
