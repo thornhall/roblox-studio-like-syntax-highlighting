@@ -32,11 +32,16 @@ var __importStar = (this && this.__importStar) || (function () {
         return result;
     };
 })();
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.activate = activate;
 const vscode = __importStar(require("vscode"));
 const path = __importStar(require("path"));
 const fs = __importStar(require("fs"));
+const RoactParser_1 = __importDefault(require("./models/RoactParser"));
+const roactParser = new RoactParser_1.default();
 const FUNCTION_REGEX = /\bfunction\b/;
 const END_REGEX = /\bend\b/;
 const DO_REGEX = /\bdo\b/;
@@ -363,6 +368,34 @@ return ${name}`;
     });
     return autoCompleteClass;
 }
+function createAutoCompleteRoact() {
+    const autoCompleteRoact = vscode.commands.registerCommand("roblox.autoCompleteRoact", async (snippetString) => {
+        const editor = vscode.window.activeTextEditor;
+        if (!editor)
+            return;
+        const doc = editor.document;
+        const pos = editor.selection.active;
+        const line = doc.lineAt(pos.line);
+        const currentLineText = line.text;
+        const indentMatch = currentLineText.match(/^(\s*)/);
+        const indentString = indentMatch ? indentMatch[1] : "";
+        const indentLevel = Math.floor(indentString.length / 4); // or .length if using tabs
+        const matchStart = currentLineText.indexOf(snippetString);
+        if (matchStart === -1)
+            return;
+        const matchEnd = matchStart + snippetString.length;
+        const rangeToReplace = new vscode.Range(new vscode.Position(pos.line, matchStart), new vscode.Position(pos.line, matchEnd));
+        roactParser.parse(currentLineText);
+        const snippet = roactParser.toSnippet(indentLevel);
+        await editor.edit(edit => {
+            edit.replace(rangeToReplace, snippet);
+        }, {
+            undoStopBefore: false,
+            undoStopAfter: false
+        });
+    });
+    return autoCompleteRoact;
+}
 function createAutoInsertDoCommand() {
     const insertDo = vscode.commands.registerCommand("roblox.autoInsertDo", async (hasDoAlready) => {
         const editor = vscode.window.activeTextEditor;
@@ -637,6 +670,7 @@ function activate(context) {
     const formatOnPaste = createFormatOnPasteCommand();
     const classAutoComplete = createClassAutoComplete();
     const insertScriptCommand = createDuplicateScriptCommand();
+    const roactAutoComplete = createAutoCompleteRoact();
     // Cache clearing every 30 minutes
     const cacheClearInterval = setInterval(() => {
         definitionCache.clear();
@@ -652,6 +686,7 @@ function activate(context) {
     context.subscriptions.push(formatOnPaste);
     context.subscriptions.push(classAutoComplete);
     context.subscriptions.push(insertScriptCommand);
+    context.subscriptions.push(roactAutoComplete);
     const config = vscode.workspace.getConfiguration();
     const isAutoInsertClassEnabled = config.get("robloxIDE.autoInsertModuleBoilerplate.enabled", true);
     vscode.workspace.onDidChangeTextDocument(async (event) => {
@@ -687,7 +722,11 @@ function activate(context) {
             const matchesElseIf = ELSEIF_REGEX_ALL.test(beforeCursor);
             const matchesElse = ELSE_REGEX.test(beforeCursor);
             const matchesClass = beforeCursor.match(CLASS_REGEX);
-            if (isAutoInsertClassEnabled && matchesClass && matchesClass[1]) {
+            const matchesRoactParser = roactParser.checkValidity(currentLineText);
+            if (matchesRoactParser) {
+                vscode.commands.executeCommand("roblox.autoCompleteRoact", matchesRoactParser);
+            }
+            else if (isAutoInsertClassEnabled && matchesClass && matchesClass[1]) {
                 if (validateScopeClosureBeforeEdit(event.document))
                     return;
                 vscode.commands.executeCommand("roblox.autoCompleteClass", matchesClass);
