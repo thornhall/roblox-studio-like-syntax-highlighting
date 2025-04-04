@@ -8,6 +8,6 @@ export default class PropItem {
     }
 
     toSnippet(): string {
-        return `${this.name}: ${this.value}`;
+        return `${this.name} = ${this.value}`;
     }
 }
