@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import * as path from "path";
 import * as fs from "fs";
 import RoactParser from './models/RoactParser';
-const roactParser:RoactParser = new RoactParser()
+const roactParser: RoactParser = new RoactParser()
 const FUNCTION_REGEX = /\bfunction\b/
 const END_REGEX = /\bend\b/
 const DO_REGEX = /\bdo\b/
@@ -113,6 +113,10 @@ async function findSymbolDefinitionInWorkspace(symbolName: string, token: vscode
     if (definitionCache.has(symbolName)) {
         return definitionCache.get(symbolName)!;
     }
+    const config = vscode.workspace.getConfiguration();
+    const enabled = config.get<boolean>("robloxIDE.goToDefinition.enabled", true);
+
+    if (!enabled) return null;
 
     const files = await vscode.workspace.findFiles("**/*.{lua,luau}", "**/node_modules/**", undefined, token);
 

@@ -145,6 +145,10 @@ async function findSymbolDefinitionInWorkspace(symbolName, token) {
     if (definitionCache.has(symbolName)) {
         return definitionCache.get(symbolName);
     }
+    const config = vscode.workspace.getConfiguration();
+    const enabled = config.get("robloxIDE.goToDefinition.enabled", true);
+    if (!enabled)
+        return null;
     const files = await vscode.workspace.findFiles("**/*.{lua,luau}", "**/node_modules/**", undefined, token);
     // Escape symbolName to safely insert into regex
     const escapedSymbol = symbolName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');

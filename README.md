@@ -9,13 +9,16 @@ Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syn
 
 - **Auto Insert Do, Then, End**: When typing a keyword that requires an enclosing keyword, press Enter and it will be autofilled much like Roblox Studio.
 
-- **Go To Class Method Definition:** Go To Static Function already works in Roblox Studio and in VSCode wIth Luau LSP. This extension enhances that functionality by allowing Go To Class Method in VSCode. Hold control/command + click a token to activate.
+- **Go To Class Method Definition:** Go To Static Function already works in Roblox Studio and in VSCode wIth Luau LSP. This extension enhances that functionality by allowing Go To Class Method in VSCode. Hold control/command + click a token to activate. Not recommended for use with large projects, this feature is toggleable.
 
-- **Go To Type Definition:** When holding control/command and clicking a Type token, the user will be taken to the type definition.  Luau LSP does not consistently offer Go To Type definitions, causing the functionality to not work in some cases. My extension aims to fix this, but will lead to multiple definitions being returned for the cases that Luau LSP does correctly handle. This means you will sometimes have to control + click + click to Go To Type, and other times it will be control + click. In return, you will consistently have type lookups.
+- **Go To Type Definition:** When holding control/command and clicking a Type token, the user will be taken to the type definition. Not recommended for use with large projects, this feature is toggleable. 
 
 - **Smart Indent On Paste:** Not everyone copies and pastes a lot in their workflows. Personally, I do. I often shift things around as I'm working. I found that when I would paste something, the first line would always be overindented and I had to backspace to get it to align. Long story short this fixes that problem.
 
-- **Duplicate Or Create Script:** Now, just like Roblox Studio, you can right click a script to duplicate it. When used on a valid directory, it will create a lua script with an appropriate extension depending on the directory
+- **Duplicate Or Create Script:** Now, just like Roblox Studio, you can right click a script to duplicate it. When used on a valid directory, it will create a lua script with an appropriate extension depending on the directory.
+
+# [New 04-04-2025] Roact AutoComplete/Emmets 
+![RoactAutoComplete](images/roactautocompleteemmet.gif)
 
 # [New 03-27-2025] Right-Click to Duplicate or Create Script
 

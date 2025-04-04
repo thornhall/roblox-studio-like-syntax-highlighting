@@ -2,7 +2,7 @@
     "name": "roblox-studio-like-syntax-highlighting",
     "displayName": "Roblox IDE",
     "description": "Syntax highlighting for VSCode inspired by Roblox Studio syntax highlighting. Requires Luau-LSP to work. Now comes with auto-insertion, Go To Class Method Definition, and Go To Type functionality!",
-    "version": "1.7.2",
+    "version": "1.8.0",
     "publisher": "ThornHall",
     "icon": "studio.png",
     "engines": {
@@ -105,6 +105,11 @@
                     "type": "boolean",
                     "default": true,
                     "description": "When enabled, typing `function TestObject.new` and pressing enter will auto-insert boilerplate for modules."
+                },
+                "robloxIDE.goToDefinition.enabled": {
+                    "type": "boolean",
+                    "default": true,
+                    "description": "When enabled, holding control and clicking a token will take you to its definition if it is a type or class method."
                 }
             }
         },
