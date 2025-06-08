@@ -141,7 +141,8 @@
                 "keyword.function",
                 "support.function",
                 "constant.language.luau",
-                "support.type"
+                "support.type",
+                "support.constant.luau"
             ],
             "settings": {
                 "foreground": "#44e7f9"
