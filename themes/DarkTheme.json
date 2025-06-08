@@ -17,7 +17,6 @@
         },
         "namespace": {
             "foreground": "#44e7f9",
-            "fontStyle": "underline"
         },
         "parameter": {
             "foreground": "#bcf7fc",
@@ -165,7 +164,8 @@
         {
             "scope": [
                 "constant.numeric",
-                "constant.language.nil"
+                "constant.language.nil",
+                "variable.other.constant.luau"
             ],
             "settings": {
                 "foreground": "#f5ce42"
