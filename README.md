@@ -17,6 +17,10 @@ Inspired by Roblox Studio's syntax highlighting, this plugin enables similar syn
 
 - **Duplicate Or Create Script:** Now, just like Roblox Studio, you can right click a script to duplicate it. When used on a valid directory, it will create a lua script with an appropriate extension depending on the directory.
 
+# [New 06-08-2025] Semantic Highlighting + contrast tuning
+Now, class methods will be italicized as well as parameters. Namespaces will be underlined, and roblox defaultLibrary functions will be more reliably displayed as the correct color. Also, the contrast was toned down a bit to make the extension easier on the eyes. 
+![SemanticHighlighting](images/semantic_highlighting.png)
+
 # [New 04-04-2025] Roact AutoComplete/Emmets 
 ![RoactAutoComplete](images/roactautocompleteemmet.gif)
 
