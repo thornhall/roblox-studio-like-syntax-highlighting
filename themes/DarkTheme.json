@@ -1,7 +1,7 @@
 {
     "name": "Roblox Dark",
     "colors": {
-        "editor.background": "#000000",
+        "editor.background": "#212121",
         "editor.foreground": "#ffffff",
         "editorBracketHighlight.foreground2": "#f77575",
         "editorBracketHighlight.foreground1": "#FFFFFF",
@@ -10,7 +10,30 @@
         "editorBracketHighlight.foreground5": "#FFFFFF",
         "editorBracketHighlight.foreground6": "#f5ce42"
     },
-    "semanticHighlighting": false,
+    "semanticHighlighting": true,
+    "semanticTokenColors": {
+        "defaultLibrary": {
+            "foreground": "#44e7f9"
+        },
+        "namespace": {
+            "foreground": "#44e7f9",
+            "fontStyle": "underline"
+        },
+        "parameter": {
+            "foreground": "#bcf7fc",
+            "fontStyle": "italic"
+        },
+        "type": {
+            "foreground": "#44e7f9"
+        },
+        "method": {
+            "fontStyle": "italic"
+        },
+        "keyword": {
+            "foreground": "#f77575",
+            "fontStyle": "bold"
+        }
+    },
     "tokenColors": [
         {
             "scope": [
@@ -43,7 +66,8 @@
         {
             "scope": [
                 "constant.language.boolean.true",
-                "constant.language.boolean.false"
+                "constant.language.boolean.false",
+                "constant.language.nil"
             ],
             "settings": {
                 "foreground": "#f5ce42",
@@ -69,7 +93,6 @@
         },
         {
             "scope": [
-                "constant.language",
                 "number"
             ],
             "settings": {
